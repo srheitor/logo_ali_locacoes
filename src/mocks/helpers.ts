@@ -9,6 +9,9 @@ export function daysFromNow(days: number, hour = 12, minute = 0): string {
   return d.toISOString();
 }
 
+/** Prefixo do site ("/" local, "/logo_ali_locacoes/" no GitHub Pages). */
+const BASE = import.meta.env.BASE_URL;
+
 export type Comodo = 'bedroom' | 'livingroom' | 'kitchen' | 'bathroom';
 const TOTAL_PALETAS = 6;
 
@@ -17,6 +20,6 @@ const TOTAL_PALETAS = 6;
  * No sistema real, as fotos virão do Supabase Storage (bucket "anuncios").
  */
 export const fotoMock = (comodo: Comodo, variacao: number) =>
-  `/imoveis/${comodo}-${(Math.abs(variacao) % TOTAL_PALETAS) + 1}.svg`;
+  `${BASE}imoveis/${comodo}-${(Math.abs(variacao) % TOTAL_PALETAS) + 1}.svg`;
 
-export const FOTO_FALLBACK = '/imovel-placeholder.svg';
+export const FOTO_FALLBACK = `${BASE}imovel-placeholder.svg`;
