@@ -83,4 +83,7 @@ export const router = createBrowserRouter([
   },
 
   { path: '*', element: <Navigate to="/login" replace /> },
-]);
+], {
+  // Rotas relativas ao caminho base do Vite (necessário no GitHub Pages, que serve em subpasta).
+  basename: import.meta.env.BASE_URL.replace(/\/$/, '') || '/',
+});

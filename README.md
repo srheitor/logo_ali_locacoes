@@ -14,6 +14,16 @@ npm run dev        # http://localhost:5173
 npm run build      # checagem de tipos + build de produção
 ```
 
+### Publicação no GitHub Pages
+
+O deploy é automático pelo workflow `.github/workflows/deploy.yml` a cada push na `main` (ou manualmente em **Actions → Deploy GitHub Pages → Run workflow**).
+
+Configuração única no repositório: **Settings → Pages → Build and deployment → Source: "GitHub Actions"**.
+
+> Não use "Deploy from a branch": isso publica o código-fonte sem compilar e a página fica em branco.
+
+O workflow compila com `BASE_PATH=/<nome-do-repo>/` (o site fica numa subpasta) e cria um `404.html` para que links diretos como `/aluno/favoritos` funcionem.
+
 ### Usuários de demonstração (senha `123456`)
 
 | Login          | Perfil        | Quem é                                       |
