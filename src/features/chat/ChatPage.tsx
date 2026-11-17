@@ -4,7 +4,6 @@ import { ArrowLeft, Lock, MessageSquare, Send } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { ImovelImage } from '@/features/anuncios/components/ImovelImage';
-import { enviarMensagem, marcarConversaLida } from '@/services/actions';
 import { capaDoAnuncio, conversasDoUsuario } from '@/services/queries';
 import { Avatar, Card, EmptyState, PageHeader } from '@/shared/components/ui';
 import { cn, formatDate, formatTime } from '@/shared/utils';
@@ -16,7 +15,7 @@ interface ChatPageProps {
 
 /** RF08 / RN04 — chat interno entre estudante e proprietário, sem expor e-mail/telefone. */
 export function ChatPage({ anuncioLink }: ChatPageProps) {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const user = useCurrentUser();
   const [params, setParams] = useSearchParams();
   const [texto, setTexto] = useState('');
@@ -27,17 +26,17 @@ export function ChatPage({ anuncioLink }: ChatPageProps) {
   const ativa = conversas.find((c) => c.conversa.id === ativaId);
 
   useEffect(() => {
-    if (ativaId) run((d) => marcarConversaLida(d, ativaId, user.id));
-  }, [ativaId, ativa?.mensagens.length, run, user.id]);
+    if (ativaId) void acoes.marcarConversaLida(ativaId, user.id);
+  }, [ativaId, ativa?.mensagens.length, acoes, user.id]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [ativaId, ativa?.mensagens.length]);
 
-  const enviar = (e: FormEvent) => {
+  const enviar = async (e: FormEvent) => {
     e.preventDefault();
     if (!ativaId) return;
-    const r = run((d) => enviarMensagem(d, ativaId, user.id, texto));
+    const r = await acoes.enviarMensagem(ativaId, user.id, texto);
     if (r.ok) setTexto('');
   };
 

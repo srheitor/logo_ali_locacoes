@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { CalendarX } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import { VisitaCard } from '@/features/visitas/VisitaCard';
-import { atualizarStatusVisita } from '@/services/actions';
 import { capaDoAnuncio, visitasDetalhadas } from '@/services/queries';
 import { PromptModal } from '@/shared/components/feedback/PromptModal';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -13,7 +12,7 @@ import { useEstudanteAtual } from '../useEstudanteAtual';
 type Aba = 'proximas' | 'historico';
 
 export function MinhasVisitasPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const toast = useToast();
   const { user } = useEstudanteAtual();
   const [aba, setAba] = useState<Aba>('proximas');
@@ -25,8 +24,8 @@ export function MinhasVisitasPage() {
   const historico = todas.filter((v) => !proximas.includes(v)).reverse();
   const lista = aba === 'proximas' ? proximas : historico;
 
-  const cancelar = (motivo: string) => {
-    const r = run((d) => atualizarStatusVisita(d, cancelarId!, 'CANCELADA', motivo));
+  const cancelar = async (motivo: string) => {
+    const r = await acoes.atualizarStatusVisita(cancelarId!, 'CANCELADA', motivo);
     if (!r.ok) return toast.error(r.error);
     toast.info('Visita cancelada.');
     setCancelarId(undefined);

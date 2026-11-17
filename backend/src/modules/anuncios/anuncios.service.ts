@@ -1,4 +1,5 @@
 import { businessRule, conflict, forbidden, must, mustFind, notFound } from '../../lib/errors.js';
+import { montarEndereco } from '../../lib/formato-front.js';
 import { distanciaKm } from '../../lib/geo.js';
 import { ordenarFotos, sanitizeSearch } from '../../lib/postgrest.js';
 import { agora, contar, novoId, somarDias, supabaseAdmin, T } from '../../lib/supabase.js';
@@ -233,12 +234,6 @@ async function garantirAcesso(user: UsuarioAutenticado, anuncioId: Id, { permiti
     throw forbidden('Você não é o proprietário deste anúncio (RN05).');
   }
   return anuncio;
-}
-
-/** "Rua X, 420 – São Pedro – Juiz de Fora/MG – CEP 36036-330" */
-function montarEndereco(e: Pick<AnuncioInput, 'endereco' | 'bairro' | 'cidade' | 'uf' | 'cep'>) {
-  const local = [e.cidade, e.uf?.toUpperCase()].filter(Boolean).join('/');
-  return [e.endereco, e.bairro, local, e.cep && `CEP ${e.cep}`].filter(Boolean).join(' – ');
 }
 
 interface Filhos {

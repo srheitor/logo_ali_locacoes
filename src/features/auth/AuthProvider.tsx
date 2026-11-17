@@ -1,16 +1,22 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-import { useData } from '@/app/providers/DataProvider';
+import { FONTE_DADOS, useData } from '@/app/providers/DataProvider';
+import { createSeed } from '@/mocks';
+import { api, lerSessao, salvarSessao } from '@/services/api/client';
 import type { TipoUsuario, Usuario } from '@/shared/types/domain';
 
 /**
- * Autenticação MOCK — compara login/senha com os usuários do seed.
- * No sistema real: supabase.auth.signInWithPassword (senha com hash bcrypt — RNF03).
+ * Autenticação.
+ * - modo mock: compara login/senha com os usuários do seed (apenas para a demonstração);
+ * - modo api:  POST /auth/login no backend (senha com bcrypt — RNF03) e sessão com tokens JWT.
  */
 const SESSION_KEY = 'logoali:session';
 
+type LoginResult = { ok: true; user: Usuario } | { ok: false; error: string };
+
 interface AuthContextValue {
   user: Usuario | null;
-  login: (login: string, senha: string) => { ok: true; user: Usuario } | { ok: false; error: string };
+  login: (login: string, senha: string) => Promise<LoginResult>;
+  /** Entra com um usuário já autenticado (ex.: logo após o cadastro). */
   loginAs: (userId: string) => void;
   logout: () => void;
 }
@@ -24,6 +30,7 @@ export const homeByRole: Record<TipoUsuario, string> = {
 };
 
 function readSession() {
+  if (FONTE_DADOS === 'api') return lerSessao()?.usuarioId ?? null;
   try {
     return localStorage.getItem(SESSION_KEY);
   } catch {
@@ -40,13 +47,36 @@ function writeSession(id: string | null) {
   }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { db } = useData();
-  const [userId, setUserId] = useState<string | null>(readSession);
-  const user = db.usuarios.find((u) => u.id === userId && u.ativo) ?? null;
+/** No modo API, os apelidos da demo ("aluno", "admin"…) viram os e-mails dos usuários do seed. */
+function emailDoLogin(login: string) {
+  const chave = login.trim().toLowerCase();
+  if (chave.includes('@')) return chave;
+  return createSeed().usuarios.find((u) => u.login.toLowerCase() === chave)?.email ?? chave;
+}
 
-  const login: AuthContextValue['login'] = useCallback(
-    (loginOrEmail, senha) => {
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const { db, recarregar } = useData();
+  const [userId, setUserId] = useState<string | null>(readSession);
+  const user = db.usuarios.find((u) => u.id === userId && u.ativo !== false) ?? null;
+
+  const login = useCallback<AuthContextValue['login']>(
+    async (loginOrEmail, senha) => {
+      if (FONTE_DADOS === 'api') {
+        try {
+          const r = await api<{ sessao: { access_token: string; refresh_token: string }; usuario: Usuario }>(
+            'POST',
+            '/auth/login',
+            { email: emailDoLogin(loginOrEmail), senha },
+          );
+          salvarSessao({ usuarioId: r.usuario.id, access_token: r.sessao.access_token, refresh_token: r.sessao.refresh_token });
+          await recarregar();
+          setUserId(r.usuario.id);
+          return { ok: true, user: r.usuario };
+        } catch (err) {
+          return { ok: false, error: err instanceof Error ? err.message : 'Falha no login.' };
+        }
+      }
+
       const key = loginOrEmail.trim().toLowerCase();
       const found = db.usuarios.find((u) => u.login.toLowerCase() === key || u.email.toLowerCase() === key);
       if (!found || found.senha !== senha) return { ok: false, error: 'Usuário ou senha inválidos.' };
@@ -55,18 +85,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       writeSession(found.id);
       return { ok: true, user: found };
     },
-    [db.usuarios],
+    [db.usuarios, recarregar],
   );
 
   const loginAs = useCallback((id: string) => {
     setUserId(id);
-    writeSession(id);
+    if (FONTE_DADOS === 'mock') writeSession(id);
   }, []);
 
   const logout = useCallback(() => {
     setUserId(null);
-    writeSession(null);
-  }, []);
+    if (FONTE_DADOS === 'api') {
+      salvarSessao(null);
+      void recarregar().catch(() => undefined); // volta a ver só os dados públicos
+    } else {
+      writeSession(null);
+    }
+  }, [recarregar]);
 
   return <AuthContext.Provider value={{ user, login, loginAs, logout }}>{children}</AuthContext.Provider>;
 }

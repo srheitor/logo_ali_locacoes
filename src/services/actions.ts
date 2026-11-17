@@ -110,7 +110,8 @@ export function alternarUsuarioAtivo(db: Database, usuarioId: Id): ActionResult 
 export function enviarVerificacao(
   db: Database,
   estudanteId: Id,
-  dados: { email_institucional?: string; documento_url?: string },
+  /** `arquivo`: o comprovante em si — usado só no modo API (upload para o Storage). */
+  dados: { email_institucional?: string; documento_url?: string; arquivo?: Blob },
 ): ActionResult<'APROVADO' | 'PENDENTE'> {
   const { email_institucional, documento_url } = dados;
   if (!email_institucional && !documento_url) return fail('Informe o e-mail institucional e/ou o documento.');

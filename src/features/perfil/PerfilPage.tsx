@@ -1,7 +1,6 @@
 import type { FormEvent } from 'react';
 import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
-import { atualizarUsuario } from '@/services/actions';
 import { getEstudante, getProprietario, nomeCampus } from '@/services/queries';
 import {
   CpfCnpjInput,
@@ -29,7 +28,7 @@ import {
 
 /** Perfil do usuário logado — mesma tela para os três perfis, com seções específicas. */
 export function PerfilPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const toast = useToast();
   const user = useCurrentUser();
   const estudante = getEstudante(db, user.id);
@@ -52,19 +51,17 @@ export function PerfilPage() {
     },
   );
 
-  const salvar = (e: FormEvent) => {
+  const salvar = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.validateAll()) return;
     const v = form.values;
-    const r = run((d) =>
-      atualizarUsuario(d, user.id, {
-        nome: v.nome,
-        telefone: v.telefone,
-        cpf: v.cpf,
-        data_nascimento: v.nascimento ? brDateToIso(v.nascimento) : undefined,
-        ...(estudante ? { campus_id: v.campus, bio_preferencias: v.bio } : {}),
-      }),
-    );
+    const r = await acoes.atualizarUsuario(user.id, {
+      nome: v.nome,
+      telefone: v.telefone,
+      cpf: v.cpf,
+      data_nascimento: v.nascimento ? brDateToIso(v.nascimento) : undefined,
+      ...(estudante ? { campus_id: v.campus, bio_preferencias: v.bio } : {}),
+    });
     if (r.ok) toast.success('Perfil atualizado!');
     else toast.error(r.error);
   };

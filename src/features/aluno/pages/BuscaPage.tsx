@@ -3,7 +3,6 @@ import { LayoutList, Map as MapIcon, Columns2, SearchX, SlidersHorizontal, Gradu
 import { useData } from '@/app/providers/DataProvider';
 import { AnuncioCard } from '@/features/anuncios/components/AnuncioCard';
 import { AnunciosMap } from '@/features/anuncios/components/AnunciosMap';
-import { alternarFavorito } from '@/services/actions';
 import { anunciosPublicos, capaDoAnuncio, deslocamentoAteCampus, isFavorito, mediaAvaliacoes } from '@/services/queries';
 import { CurrencyInput, SelectInput, Toggle } from '@/shared/components/form';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -27,7 +26,7 @@ const filtrosIniciais = {
 
 /** RF05 + RF06 — busca com filtros, em lista e no mapa. */
 export function BuscaPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const toast = useToast();
   const { user, estudante, campus, campusLabel } = useEstudanteAtual();
   const [filtros, setFiltros] = useState(filtrosIniciais);
@@ -64,8 +63,8 @@ export function BuscaPage() {
       });
   }, [db, filtros, estudante?.campus_id]);
 
-  const toggleFav = (anuncioId: string) => {
-    const r = run((d) => alternarFavorito(d, user.id, anuncioId));
+  const toggleFav = async (anuncioId: string) => {
+    const r = await acoes.alternarFavorito(user.id, anuncioId);
     if (r.ok) toast.success(r.data ? 'Salvo nos favoritos' : 'Removido dos favoritos');
   };
 

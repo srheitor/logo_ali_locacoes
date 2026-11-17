@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { BadgeCheck, Clock, FileUp, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
-import { enviarVerificacao } from '@/services/actions';
 import { ultimaVerificacao } from '@/services/queries';
 import { EmailInput, FormField } from '@/shared/components/form';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -11,20 +10,24 @@ import { useEstudanteAtual } from '../useEstudanteAtual';
 
 /** RF09 / RN01 — verificação do vínculo estudantil. */
 export function VerificacaoPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const toast = useToast();
   const { user, estudante, campusLabel } = useEstudanteAtual();
   const [email, setEmail] = useState('');
-  const [arquivo, setArquivo] = useState<string>();
+  const [arquivo, setArquivo] = useState<File>();
   const [emailError, setEmailError] = useState<string>();
 
   const ultima = ultimaVerificacao(db, user.id);
   const historico = db.vinculos.filter((v) => v.estudante_id === user.id).sort((a, b) => b.enviado_em.localeCompare(a.enviado_em));
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (email && !isInstitutionalEmail(email)) return setEmailError('Use seu e-mail institucional (ex.: nome@estudante.ufjf.br)');
-    const r = run((d) => enviarVerificacao(d, user.id, { email_institucional: email || undefined, documento_url: arquivo }));
+    const r = await acoes.enviarVerificacao(user.id, {
+      email_institucional: email || undefined,
+      documento_url: arquivo?.name,
+      arquivo, // usado no modo API: o comprovante sobe para o Storage
+    });
     if (!r.ok) return toast.error(r.error);
     if (r.data === 'APROVADO') toast.success('Vínculo verificado automaticamente! 🎉');
     else toast.info('Enviado! Sua verificação ficará pendente para análise do administrador.');
@@ -67,8 +70,8 @@ export function VerificacaoPage() {
                   <FormField label="Comprovante de matrícula" hint="Declaração, carteirinha ou atestado de matrícula (imagem ou PDF).">
                     <label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 p-4 text-sm text-slate-600 hover:border-brand-400">
                       <FileUp size={20} className="text-slate-400" />
-                      {arquivo ? <span className="font-medium text-slate-800">{arquivo}</span> : 'Clique para selecionar o arquivo'}
-                      <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setArquivo(e.target.files?.[0]?.name)} />
+                      {arquivo ? <span className="font-medium text-slate-800">{arquivo.name}</span> : 'Clique para selecionar o arquivo'}
+                      <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setArquivo(e.target.files?.[0])} />
                     </label>
                   </FormField>
                   <Button type="submit" icon={<BadgeCheck size={16} />} disabled={!email && !arquivo}>Enviar para verificação</Button>

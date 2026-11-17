@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Building2, GraduationCap, MapPinned, ShieldCheck, User } from 'lucide-react';
+import { FONTE_DADOS } from '@/app/providers/DataProvider';
 import { DEMO_SENHA } from '@/mocks';
 import { PasswordInput, TextInput } from '@/shared/components/form';
 import { Logo } from '@/shared/components/layout/Logo';
@@ -19,18 +20,21 @@ export function LoginPage() {
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState<string>();
+  const [entrando, setEntrando] = useState(false);
 
   if (user) return <Navigate to={homeByRole[user.tipo_usuario]} replace />;
 
-  const doLogin = (l: string, s: string) => {
-    const result = login(l, s);
+  const doLogin = async (l: string, s: string) => {
+    setEntrando(true);
+    const result = await login(l, s);
+    setEntrando(false);
     if (!result.ok) return setError(result.error);
     navigate(homeByRole[result.user.tipo_usuario]);
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    doLogin(usuario, senha);
+    void doLogin(usuario, senha);
   };
 
   return (
@@ -73,8 +77,8 @@ export function LoginPage() {
             />
             <PasswordInput value={senha} onChange={setSenha} autoComplete="current-password" />
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-            <Button type="submit" fullWidth size="lg">
-              Entrar
+            <Button type="submit" fullWidth size="lg" disabled={entrando}>
+              {entrando ? 'Entrando…' : 'Entrar'}
             </Button>
           </form>
 
@@ -93,7 +97,8 @@ export function LoginPage() {
               {demoUsers.map((d) => (
                 <button
                   key={d.login}
-                  onClick={() => doLogin(d.login, DEMO_SENHA)}
+                  onClick={() => void doLogin(d.login, DEMO_SENHA)}
+                  disabled={entrando}
                   className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center transition hover:border-brand-300 hover:shadow-sm"
                 >
                   <span className={`rounded-lg p-2 ${d.color}`}>{d.icon}</span>
@@ -105,6 +110,11 @@ export function LoginPage() {
             <p className="mt-3 text-center text-xs text-slate-400">
               Senha de todos os usuários de teste: <code className="font-semibold text-slate-600">{DEMO_SENHA}</code>
             </p>
+            {FONTE_DADOS === 'api' && (
+              <p className="mt-2 text-center text-xs text-amber-600">
+                Modo API (dados do Supabase): o acesso rápido usa os usuários criados por <code>npm run seed</code> no backend.
+              </p>
+            )}
           </div>
         </div>
       </div>

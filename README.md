@@ -3,16 +3,36 @@
 Esboço da plataforma web de locação de imóveis para universitários (Projeto A3 – Banco de Dados).
 Documentação completa: <https://adriano-projects.gitbook.io/logo-ali-documentacao/>
 
-> **Versão de apresentação:** todos os dados são **mockados** (em memória + `localStorage`).
-> A camada de dados foi isolada para ser trocada pelo Supabase/PostgreSQL depois, sem mexer nas telas.
+> A aplicação tem **duas fontes de dados**, escolhidas pela variável `VITE_FONTE_DADOS`:
+>
+> - **mock** (padrão): dados em memória + `localStorage`. Funciona sem backend e é o que o GitHub Pages publica.
+> - **api**: dados reais do Supabase, via backend Node.js (pasta [`backend/`](backend/README.md)).
+>
+> As telas são as mesmas nos dois modos. A versão original, só com mocks, também está marcada com a tag `v0.1-mock`.
 
 ## Como rodar
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # checagem de tipos + build de produção
+npm run dev        # modo mock: http://localhost:5173
+npm run build      # checagem de tipos + build de produção (modo mock)
 ```
+
+### Com o banco de dados (modo API)
+
+Em dois terminais:
+
+```bash
+# 1) backend (precisa do backend/.env — ver backend/README.md)
+cd backend && npm install && npm run dev      # http://localhost:3333/api
+
+# 2) front ligado à API (usa o arquivo .env.api)
+npm run dev:api
+```
+
+- Os botões de **acesso rápido** do login usam os usuários de demonstração criados por `npm run seed` no backend (senha `123456`).
+- Se a porta 5173 estiver ocupada, o Vite usa outra. Em desenvolvimento, o backend aceita qualquer porta do `localhost`.
+- No modo API, o menu lateral mostra "Dados: API · Supabase" no lugar de "Restaurar dados da demo".
 
 ### Publicação no GitHub Pages
 
@@ -48,7 +68,7 @@ src/
 │   ├── App.tsx               # Providers (dados → auth → toasts → rotas)
 │   ├── routes.tsx            # Todas as rotas, agrupadas por perfil
 │   ├── layouts/RoleLayout.tsx# Menu lateral de cada perfil
-│   └── providers/DataProvider.tsx  # "Banco" mockado (trocar pelo Supabase aqui)
+│   └── providers/DataProvider.tsx  # Fonte de dados: mock (memória) ou api (snapshot do backend)
 │
 ├── shared/                   # ♻️ Reutilizável em qualquer tela — sem regra de negócio
 │   ├── components/
@@ -67,7 +87,9 @@ src/
 │
 ├── services/                 # Acesso a dados
 │   ├── queries.ts            # Leituras (equivalem aos SELECTs da seção 16)
-│   └── actions.ts            # Escritas + regras de negócio RN01–RN09
+│   ├── actions.ts            # Escritas + regras de negócio RN01–RN09 (modo mock)
+│   ├── acoes.ts              # Ações usadas pelas telas: mock → actions.ts, api → backend
+│   └── api/client.ts         # Cliente HTTP: sessão JWT, renovação automática e upload ao Storage
 │
 ├── mocks/                    # Seed fictício (Juiz de Fora / UFJF / UniAcademia)
 │
@@ -136,6 +158,7 @@ const { status, endereco, error } = useCepLookup(cep, { onFound: (e) => preenche
 
 ## Próximos passos
 
-- Trocar `DataProvider` + `services/` por chamadas ao **Supabase** (Auth, tabelas, Storage).
+- Hoje, no modo API, as telas leem um "snapshot" (`GET /api/snapshot`) no mesmo formato dos mocks. Com mais volume de dados, cada tela deve passar a usar as rotas específicas da API (busca paginada, conversas etc.).
+- Criar os buckets do Storage (`npm run setup:storage` no backend) para o envio de fotos e comprovantes no modo API.
 - `cpf` e `data_nascimento` foram adicionados ao usuário no protótipo — avaliar incluí-los no modelo lógico.
 - Substituir a estimativa de tempo de deslocamento por uma API de rotas real.

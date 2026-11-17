@@ -16,6 +16,7 @@ Front (React)  ──HTTP/JSON──▶  Backend (Express)  ──chave secreta�
 
 ```bash
 cp .env.example .env      # preencher SUPABASE_URL, SUPABASE_SECRET_KEY e JWT_SECRET
+                          # (em desenvolvimento o CORS aceita qualquer porta do localhost)
 npm install
 npm run setup:storage     # uma vez: cria os buckets avatars, anuncios e documentos
 npm run seed              # opcional: dados de demonstração (senha 123456)
@@ -82,6 +83,7 @@ Respostas de erro: `{ "error": "mensagem", "details"?: ... }`, com 400 para vali
 | GET · POST | `/admin/anuncios` · `/admin/anuncios/:id/moderacao` | admin | RF10, moderação |
 | GET | `/admin/moderacoes`, `/admin/relatorios` | admin | consultas 3, 4 e 9 + contagens |
 | POST | `/admin/rotinas/expiracao` | admin | RN03 (republica vencidos aprovados; não mexe em `ALUGADO`/`INDISPONIVEL`) |
+| GET | `/snapshot` | público/logado | dados no formato `Database` do front, filtrados pelo perfil. Ponte para as telas atuais (`npm run dev:api`) |
 
 ## Adaptações ao schema atual
 

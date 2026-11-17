@@ -11,6 +11,7 @@ import { catalogoRouter } from './modules/catalogo/catalogo.routes.js';
 import { conversasRouter } from './modules/conversas/conversas.routes.js';
 import { favoritosRouter } from './modules/favoritos/favoritos.routes.js';
 import { uploadsRouter } from './modules/uploads/uploads.routes.js';
+import { snapshotRouter } from './modules/snapshot/snapshot.routes.js';
 import { usuariosRouter } from './modules/usuarios/usuarios.routes.js';
 import { verificacoesRouter } from './modules/verificacoes/verificacoes.routes.js';
 import { visitasRouter } from './modules/visitas/visitas.routes.js';
@@ -20,7 +21,16 @@ export function createApp() {
 
   app.disable('x-powered-by');
   app.use(helmet());
-  app.use(cors({ origin: env.CORS_ORIGIN }));
+  app.use(
+    cors({
+      // Origens do CORS_ORIGIN; em desenvolvimento, qualquer porta do localhost
+      // (o Vite troca de porta quando a 5173 já está em uso).
+      origin: (origin, callback) => {
+        const local = env.NODE_ENV === 'development' && !!origin && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+        callback(null, !origin || local || env.CORS_ORIGIN.includes(origin));
+      },
+    }),
+  );
   app.use(express.json({ limit: '1mb' }));
 
   app.get('/health', (_req, res) => {
@@ -39,6 +49,7 @@ export function createApp() {
   api.use('/conversas', conversasRouter);
   api.use('/uploads', uploadsRouter);
   api.use('/admin', adminRouter);
+  api.use('/snapshot', snapshotRouter); // ponte para as telas atuais do front
   app.use('/api', api);
 
   app.use(notFoundHandler);

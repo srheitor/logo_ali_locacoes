@@ -18,8 +18,13 @@ import bcrypt from 'bcryptjs';
 import { createSeed, DEMO_SENHA } from '@/mocks/index.ts';
 import { supabaseAdmin, T } from '../src/lib/supabase.ts';
 
+/** Usuários do mock cujo e-mail já existe no banco → id do usuário real (que não é sobrescrito). */
+const existentes = new Map<string, string>();
+
 /** UUID determinístico a partir do id do mock. */
 function uuid(chave: string) {
+  const real = existentes.get(chave);
+  if (real) return real;
   const h = createHash('sha1').update(`logoali:${chave}`).digest();
   h[6] = (h[6]! & 0x0f) | 0x50;
   h[8] = (h[8]! & 0x3f) | 0x80;
@@ -45,13 +50,28 @@ async function povoar() {
   console.log('Povoando o banco do Supabase…');
   const hash = await bcrypt.hash(DEMO_SENHA, 10);
 
+  // Usuários reais com o mesmo e-mail de um usuário de demo são reaproveitados, sem alterar senha nem dados.
+  const { data: jaCadastrados, error } = await supabaseAdmin
+    .from(T.usuario)
+    .select('id, email')
+    .in('email', db.usuarios.map((u) => u.email.toLowerCase()));
+  if (error) falhou('ler', T.usuario, error);
+  for (const u of db.usuarios) {
+    const real = jaCadastrados?.find((r) => r.email === u.email.toLowerCase());
+    if (real && real.id !== uuid(u.id)) {
+      existentes.set(u.id, real.id as string);
+      console.log(`  • ${u.email} já existe: mantido como está (senha não alterada)`);
+    }
+  }
+  const novo = (mockId: string) => !existentes.has(mockId);
+
   await upsert(T.instituicao, db.instituicoes.map((i) => ({ ...i, id: uuid(i.id) })));
   await upsert(T.campus, db.campi.map((c) => ({ ...c, id: uuid(c.id), instituicao_id: uuid(c.instituicao_id) })));
   await upsert(T.comodidade, db.comodidades.map((c) => ({ ...c, id: uuid(c.id) })));
 
   await upsert(
     T.usuario,
-    db.usuarios.map((u) => ({
+    db.usuarios.filter((u) => novo(u.id)).map((u) => ({
       id: uuid(u.id),
       nome: u.nome,
       email: u.email.toLowerCase(),
@@ -66,7 +86,7 @@ async function povoar() {
   );
   await upsert(
     T.estudante,
-    db.estudantes.map((e) => ({
+    db.estudantes.filter((e) => novo(e.usuario_id)).map((e) => ({
       usuario_id: uuid(e.usuario_id),
       campus_id: uuid(e.campus_id),
       matricula: e.matricula,
@@ -76,7 +96,7 @@ async function povoar() {
     })),
     'usuario_id',
   );
-  await upsert(T.proprietario, db.proprietarios.map((p) => ({ ...p, usuario_id: uuid(p.usuario_id) })), 'usuario_id');
+  await upsert(T.proprietario, db.proprietarios.filter((p) => novo(p.usuario_id)).map((p) => ({ ...p, usuario_id: uuid(p.usuario_id) })), 'usuario_id');
 
   await upsert(
     T.anuncio,
@@ -171,7 +191,10 @@ async function povoar() {
   );
 
   console.log(`\nPronto! Logins de demonstração (senha ${DEMO_SENHA}):`);
-  for (const u of db.usuarios) console.log(`  ${u.tipo_usuario.padEnd(13)} ${u.email}`);
+  for (const u of db.usuarios) {
+    const obs = existentes.has(u.id) ? '  (usuário já existente: senha própria)' : '';
+    console.log(`  ${u.tipo_usuario.padEnd(13)} ${u.email}${obs}`);
+  }
 }
 
 /** Remove os dados de demonstração e tudo o que os usuários de demo criaram (ordem inversa das FKs). */
