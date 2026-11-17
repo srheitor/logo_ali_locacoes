@@ -9,8 +9,11 @@ export function daysFromNow(days: number, hour = 12, minute = 0): string {
   return d.toISOString();
 }
 
-/** Prefixo do site ("/" local, "/logo_ali_locacoes/" no GitHub Pages). */
-const BASE = import.meta.env.BASE_URL;
+/**
+ * Prefixo do site ("/" local, "/logo_ali_locacoes/" no GitHub Pages).
+ * Fora do Vite (seed do backend em Node) `import.meta.env` não existe: usa "/".
+ */
+const BASE = import.meta.env?.BASE_URL ?? '/';
 
 export type Comodo = 'bedroom' | 'livingroom' | 'kitchen' | 'bathroom';
 const TOTAL_PALETAS = 6;
