@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "seed": "tsx --env-file-if-exists=.env --tsconfig scripts/tsconfig.json scripts/seed.ts",
     "setup:storage": "tsx --env-file-if-exists=.env --tsconfig scripts/tsconfig.json scripts/setup-storage.ts",
-    "criar-admin": "tsx --env-file-if-exists=.env --tsconfig scripts/tsconfig.json scripts/criar-admin.ts"
+    "criar-admin": "tsx --env-file-if-exists=.env --tsconfig scripts/tsconfig.json scripts/criar-admin.ts",
+    "seed:fotos": "tsx --env-file-if-exists=.env --tsconfig scripts/tsconfig.json scripts/fotos-demo.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

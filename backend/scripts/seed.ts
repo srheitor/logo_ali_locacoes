@@ -13,23 +13,18 @@
  *   npm run seed              → cria/atualiza os dados de demonstração
  *   npm run seed -- --limpar  → remove os dados de demonstração (e o que foi criado pelos usuários de demo)
  */
-import { createHash } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { createSeed, DEMO_SENHA } from '@/mocks/index.ts';
 import { supabaseAdmin, T } from '../src/lib/supabase.ts';
+import { aplicarFotosDemo, removerFotosDemo } from './fotos-demo.ts';
+import { uuidDoMock } from './ids.ts';
 
 /** Usuários do mock cujo e-mail já existe no banco → id do usuário real (que não é sobrescrito). */
 const existentes = new Map<string, string>();
 
 /** UUID determinístico a partir do id do mock. */
 function uuid(chave: string) {
-  const real = existentes.get(chave);
-  if (real) return real;
-  const h = createHash('sha1').update(`logoali:${chave}`).digest();
-  h[6] = (h[6]! & 0x0f) | 0x50;
-  h[8] = (h[8]! & 0x3f) | 0x80;
-  const x = h.subarray(0, 16).toString('hex');
-  return `${x.slice(0, 8)}-${x.slice(8, 12)}-${x.slice(12, 16)}-${x.slice(16, 20)}-${x.slice(20)}`;
+  return existentes.get(chave) ?? uuidDoMock(chave);
 }
 
 const db = createSeed();
@@ -190,6 +185,9 @@ async function povoar() {
     })),
   );
 
+  // Fotos reais (Storage) para os anúncios que têm pasta em scripts/fotos-demo.
+  await aplicarFotosDemo();
+
   console.log(`\nPronto! Logins de demonstração (senha ${DEMO_SENHA}):`);
   for (const u of db.usuarios) {
     const obs = existentes.has(u.id) ? '  (usuário já existente: senha própria)' : '';
@@ -238,6 +236,7 @@ async function limpar() {
     if (err) falhou('limpar', tabela, err);
     console.log(`  ✔ ${tabela.padEnd(20)} ${data?.length ?? 0} removido(s)`);
   }
+  console.log(`  ✔ ${'Storage (demo/)'.padEnd(20)} ${await removerFotosDemo()} arquivo(s) removido(s)`);
 }
 
 (process.argv.includes('--limpar') ? limpar() : povoar()).catch((err) => {
