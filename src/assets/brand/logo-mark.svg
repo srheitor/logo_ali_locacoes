@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Símbolo LogoAlí">
+  <defs>
+    <linearGradient id="pin" x1="8" y1="3" x2="56" y2="61" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F7A63"/>
+      <stop offset="1" stop-color="#2FBF9B"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 3C18.75 3 8 13.75 8 27c0 17.5 24 34 24 34s24-16.5 24-34C56 13.75 45.25 3 32 3Z" fill="url(#pin)"/>
+  <path d="M32 17 45 29h-4v13H23V29h-4L32 17Z" fill="#F6F4EF"/>
+  <rect x="29.5" y="33" width="5" height="9" rx="1.2" fill="#F5A524"/>
+</svg>

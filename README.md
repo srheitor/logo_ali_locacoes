@@ -1,3 +1,5 @@
+<img src="public/logo-horizontal.svg" alt="Logo Alí" width="300" />
+
 # Logo Alí · Locações para estudantes
 
 Esboço da plataforma web de locação de imóveis para universitários (Projeto A3 – Banco de Dados).
