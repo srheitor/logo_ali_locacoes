@@ -3,7 +3,6 @@ import { CalendarX, Check, CheckCheck, X } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { VisitaCard } from '@/features/visitas/VisitaCard';
-import { atualizarStatusVisita } from '@/services/actions';
 import { capaDoAnuncio, visitasDetalhadas } from '@/services/queries';
 import { PromptModal } from '@/shared/components/feedback/PromptModal';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -15,7 +14,7 @@ type Pendente = { id: string; status: Extract<StatusVisita, 'RECUSADA' | 'CANCEL
 
 /** RF11 / RN02 — o proprietário confirma, recusa ou registra a realização da visita. */
 export function VisitasRecebidasPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const user = useCurrentUser();
   const toast = useToast();
   const [aba, setAba] = useState<Aba>('pendentes');
@@ -28,8 +27,8 @@ export function VisitasRecebidasPage() {
     historico: todas.filter((v) => ['RECUSADA', 'REALIZADA', 'CANCELADA'].includes(v.visita.status)).reverse(),
   };
 
-  const mudar = (id: string, status: StatusVisita, motivo?: string) => {
-    const r = run((d) => atualizarStatusVisita(d, id, status, motivo));
+  const mudar = async (id: string, status: StatusVisita, motivo?: string) => {
+    const r = await acoes.atualizarStatusVisita(id, status, motivo);
     if (!r.ok) return toast.error(r.error);
     toast.success(
       { CONFIRMADA: 'Visita confirmada!', RECUSADA: 'Visita recusada.', REALIZADA: 'Visita registrada como realizada.', CANCELADA: 'Visita cancelada.', SOLICITADA: '' }[status],

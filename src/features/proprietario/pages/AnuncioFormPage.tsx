@@ -5,7 +5,6 @@ import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { LocationPicker } from '@/features/anuncios/components/LocationPicker';
 import { fotoMock } from '@/mocks/helpers';
-import { salvarAnuncio } from '@/services/actions';
 import { fotosDoAnuncio, getAnuncio, regrasDoAnuncio } from '@/services/queries';
 import {
   CepInput,
@@ -35,7 +34,7 @@ function separarEndereco(endereco = '') {
 /** RF03 — cadastro/edição de anúncio pelo proprietário. */
 export function AnuncioFormPage() {
   const { id } = useParams();
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const user = useCurrentUser();
   const toast = useToast();
   const navigate = useNavigate();
@@ -107,39 +106,40 @@ export function AnuncioFormPage() {
     setFotosError(undefined);
   };
 
-  const salvar = (e: FormEvent) => {
+  const [salvando, setSalvando] = useState(false);
+
+  const salvar = async (e: FormEvent) => {
     e.preventDefault();
     const valid = form.validateAll();
     if (fotos.length < 3) setFotosError('Envie no mínimo 3 fotos (RN06).');
     if (!valid || fotos.length < 3) return toast.error('Verifique os campos destacados.');
 
     const v = form.values;
-    const r = run((d) =>
-      salvarAnuncio(
-        d,
-        user.id,
-        {
-          titulo: v.titulo,
-          descricao: v.descricao,
-          valor_aluguel: parseCurrency(v.valor),
-          tipo_imovel: v.tipo as TipoImovel,
-          quantidade_quartos: Number(v.quartos),
-          mobiliado,
-          disponibilidade_imediata: imediato,
-          cep: v.cep,
-          endereco: `${v.logradouro.trim()}, ${v.numero.trim()}`,
-          bairro: v.bairro,
-          cidade: v.cidade,
-          uf: v.uf.toUpperCase(),
-          latitude: coords.lat,
-          longitude: coords.lng,
-          fotos,
-          comodidades,
-          regras,
-        },
-        existente?.id,
-      ),
+    setSalvando(true);
+    const r = await acoes.salvarAnuncio(
+      user.id,
+      {
+        titulo: v.titulo,
+        descricao: v.descricao,
+        valor_aluguel: parseCurrency(v.valor),
+        tipo_imovel: v.tipo as TipoImovel,
+        quantidade_quartos: Number(v.quartos),
+        mobiliado,
+        disponibilidade_imediata: imediato,
+        cep: v.cep,
+        endereco: `${v.logradouro.trim()}, ${v.numero.trim()}`,
+        bairro: v.bairro,
+        cidade: v.cidade,
+        uf: v.uf.toUpperCase(),
+        latitude: coords.lat,
+        longitude: coords.lng,
+        fotos,
+        comodidades,
+        regras,
+      },
+      existente?.id,
     );
+    setSalvando(false);
     if (!r.ok) return toast.error(r.error);
     toast.success(existente ? 'Anúncio atualizado!' : 'Anúncio enviado para moderação!');
     navigate('/proprietario/anuncios');
@@ -255,7 +255,9 @@ export function AnuncioFormPage() {
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => navigate(-1)}>Cancelar</Button>
-          <Button type="submit" size="lg">{existente ? 'Salvar alterações' : 'Publicar anúncio'}</Button>
+          <Button type="submit" size="lg" disabled={salvando}>
+            {salvando ? 'Salvando…' : existente ? 'Salvar alterações' : 'Publicar anúncio'}
+          </Button>
         </div>
       </form>
     </>

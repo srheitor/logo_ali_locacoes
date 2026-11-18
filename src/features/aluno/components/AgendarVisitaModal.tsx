@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CalendarCheck } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
-import { solicitarVisita } from '@/services/actions';
 import { SelectInput, TextAreaInput, TextInput } from '@/shared/components/form';
 import { useToast } from '@/shared/components/feedback/Toast';
 import { Button, Modal } from '@/shared/components/ui';
@@ -20,7 +19,7 @@ interface Props {
 
 /** RF11 / RN02 — o estudante solicita uma visita indicando data e horário. */
 export function AgendarVisitaModal({ open, onClose, anuncio, estudanteId }: Props) {
-  const { run } = useData();
+  const { acoes } = useData();
   const toast = useToast();
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
@@ -36,10 +35,10 @@ export function AgendarVisitaModal({ open, onClose, anuncio, estudanteId }: Prop
     }
   }, [open]);
 
-  const confirmar = () => {
+  const confirmar = async () => {
     if (!data || !hora) return setError('Informe data e horário.');
     const dataHora = new Date(`${data}T${hora}:00`);
-    const r = run((d) => solicitarVisita(d, estudanteId, anuncio.id, dataHora, obs || undefined));
+    const r = await acoes.solicitarVisita(estudanteId, anuncio.id, dataHora, obs || undefined);
     if (!r.ok) return setError(r.error);
     toast.success('Visita solicitada! O proprietário irá confirmar.');
     onClose();

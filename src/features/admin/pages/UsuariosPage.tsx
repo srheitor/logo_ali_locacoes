@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
-import { alternarUsuarioAtivo } from '@/services/actions';
 import { getEstudante, getProprietario, nomeCampus } from '@/services/queries';
 import { SelectInput, TextInput } from '@/shared/components/form';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -11,7 +10,7 @@ import { formatDate, tipoUsuarioLabel } from '@/shared/utils';
 
 /** RF10 — gerenciamento de usuários. */
 export function UsuariosPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const toast = useToast();
   const [busca, setBusca] = useState('');
   const [tipo, setTipo] = useState<TipoUsuario | ''>('');
@@ -22,8 +21,8 @@ export function UsuariosPage() {
     return !q || u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
   });
 
-  const alternar = (id: string) => {
-    const r = run((d) => alternarUsuarioAtivo(d, id));
+  const alternar = async (id: string) => {
+    const r = await acoes.alternarUsuarioAtivo(id);
     if (!r.ok) toast.error(r.error);
   };
 

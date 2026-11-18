@@ -2,7 +2,6 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Building2, GraduationCap } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
-import { cadastrarUsuario } from '@/services/actions';
 import {
   CpfCnpjInput,
   CpfInput,
@@ -47,7 +46,7 @@ const initial = {
 };
 
 export function CadastroPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const { loginAs } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
@@ -78,7 +77,7 @@ export function CadastroPage() {
     .filter((c) => c.instituicao_id === values.instituicao)
     .map((c) => ({ value: c.id, label: c.nome }));
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const valid = form.validateAll();
     if (values.senha !== values.confirmar) {
@@ -87,20 +86,18 @@ export function CadastroPage() {
     }
     if (!valid) return;
 
-    const result = run((d) =>
-      cadastrarUsuario(d, {
-        tipo: perfil,
-        nome: values.nome,
-        email: values.email,
-        senha: values.senha,
-        telefone: values.telefone,
-        cpf: values.cpf,
-        data_nascimento: brDateToIso(values.nascimento),
-        campus_id: values.campus,
-        matricula: values.matricula,
-        documento: values.documento || values.cpf,
-      }),
-    );
+    const result = await acoes.cadastrarUsuario({
+      tipo: perfil,
+      nome: values.nome,
+      email: values.email,
+      senha: values.senha,
+      telefone: values.telefone,
+      cpf: values.cpf,
+      data_nascimento: brDateToIso(values.nascimento),
+      campus_id: values.campus,
+      matricula: values.matricula,
+      documento: values.documento || values.cpf,
+    });
     if (!result.ok) return toast.error(result.error);
     toast.success('Conta criada com sucesso!');
     loginAs(result.data);

@@ -4,7 +4,7 @@ import { Building2, Eye, Pause, Pencil, Play, Plus, RefreshCw, Trash2, KeyRound 
 import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { ImovelImage } from '@/features/anuncios/components/ImovelImage';
-import { alterarStatusAnuncio, excluirAnuncio, renovarAnuncio } from '@/services/actions';
+import type { Resultado } from '@/services/acoes';
 import { capaDoAnuncio } from '@/services/queries';
 import { useToast } from '@/shared/components/feedback/Toast';
 import { AnuncioStatusBadge, Badge, Button, Card, EmptyState, Modal, PageHeader, Tabs } from '@/shared/components/ui';
@@ -14,7 +14,7 @@ import { formatCurrency, formatDate, tipoImovelLabel } from '@/shared/utils';
 type Filtro = 'todos' | StatusAnuncio;
 
 export function MeusAnunciosPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const user = useCurrentUser();
   const toast = useToast();
   const [filtro, setFiltro] = useState<Filtro>('todos');
@@ -24,8 +24,8 @@ export function MeusAnunciosPage() {
   const lista = filtro === 'todos' ? meus : meus.filter((a) => a.status === filtro);
   const count = (s: StatusAnuncio) => meus.filter((a) => a.status === s).length;
 
-  const acao = (fn: Parameters<typeof run>[0], msg: string) => {
-    const r = run(fn);
+  const acao = async (executar: () => Promise<Resultado>, msg: string) => {
+    const r = await executar();
     if (r.ok) toast.success(msg);
     else toast.error(r.error);
   };
@@ -74,14 +74,14 @@ export function MeusAnunciosPage() {
                 <Link to={`/proprietario/anuncios/${a.id}/editar`}><Button size="sm" variant="outline" icon={<Pencil size={14} />}>Editar</Button></Link>
                 {a.status === 'DISPONIVEL' && (
                   <>
-                    <Button size="sm" variant="outline" icon={<KeyRound size={14} />} onClick={() => acao((d) => alterarStatusAnuncio(d, a.id, 'ALUGADO'), 'Marcado como alugado')}>Alugado</Button>
-                    <Button size="sm" variant="outline" icon={<Pause size={14} />} onClick={() => acao((d) => alterarStatusAnuncio(d, a.id, 'INDISPONIVEL'), 'Anúncio pausado')}>Pausar</Button>
+                    <Button size="sm" variant="outline" icon={<KeyRound size={14} />} onClick={() => acao(() => acoes.alterarStatusAnuncio(a.id, 'ALUGADO'), 'Marcado como alugado')}>Alugado</Button>
+                    <Button size="sm" variant="outline" icon={<Pause size={14} />} onClick={() => acao(() => acoes.alterarStatusAnuncio(a.id, 'INDISPONIVEL'), 'Anúncio pausado')}>Pausar</Button>
                   </>
                 )}
                 {(a.status === 'INDISPONIVEL' || a.status === 'ALUGADO') && (
-                  <Button size="sm" variant="outline" icon={<Play size={14} />} onClick={() => acao((d) => alterarStatusAnuncio(d, a.id, 'DISPONIVEL'), 'Anúncio reativado')}>Reativar</Button>
+                  <Button size="sm" variant="outline" icon={<Play size={14} />} onClick={() => acao(() => acoes.alterarStatusAnuncio(a.id, 'DISPONIVEL'), 'Anúncio reativado')}>Reativar</Button>
                 )}
-                <Button size="sm" variant="outline" icon={<RefreshCw size={14} />} onClick={() => acao((d) => renovarAnuncio(d, a.id), 'Anúncio renovado por mais 30 dias')}>Renovar</Button>
+                <Button size="sm" variant="outline" icon={<RefreshCw size={14} />} onClick={() => acao(() => acoes.renovarAnuncio(a.id), 'Anúncio renovado por mais 30 dias')}>Renovar</Button>
                 <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" icon={<Trash2 size={14} />} onClick={() => setExcluir(a)} aria-label="Excluir" />
               </div>
             </Card>
@@ -100,7 +100,8 @@ export function MeusAnunciosPage() {
             <Button
               variant="danger"
               onClick={() => {
-                acao((d) => excluirAnuncio(d, excluir!.id), 'Anúncio excluído');
+                const alvo = excluir!.id;
+                void acao(() => acoes.excluirAnuncio(alvo), 'Anúncio excluído');
                 setExcluir(undefined);
               }}
             >

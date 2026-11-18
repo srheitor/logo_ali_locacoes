@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { Building2, ClipboardCheck, Clock, PlayCircle, ShieldQuestion, Users } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
-import { executarRotinaExpiracao } from '@/services/actions';
 import { mediaAvaliacoes } from '@/services/queries';
 import { useToast } from '@/shared/components/feedback/Toast';
 import { BarList, Button, Card, CardBody, CardHeader, PageHeader, StatCard, VisitaStatusBadge } from '@/shared/components/ui';
@@ -11,7 +10,7 @@ import { tipoImovelLabel } from '@/shared/utils';
 
 /** RF10 — painel administrativo com relatórios básicos. */
 export function PainelAdminPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const toast = useToast();
   const user = useCurrentUser();
 
@@ -41,8 +40,8 @@ export function PainelAdminPage() {
 
   const statusVisita: StatusVisita[] = ['SOLICITADA', 'CONFIRMADA', 'REALIZADA', 'RECUSADA', 'CANCELADA'];
 
-  const rodarRotina = () => {
-    const r = run(executarRotinaExpiracao);
+  const rodarRotina = async () => {
+    const r = await acoes.executarRotinaExpiracao();
     if (r.ok) toast.success(`Rotina RN03 executada: ${r.data.expirados} vencido(s), ${r.data.republicados} republicado(s).`);
   };
 

@@ -17,7 +17,6 @@ import { useData } from '@/app/providers/DataProvider';
 import { AnunciosMap } from '@/features/anuncios/components/AnunciosMap';
 import { DeslocamentoInfo } from '@/features/anuncios/components/DeslocamentoInfo';
 import { FotoGaleria } from '@/features/anuncios/components/FotoGaleria';
-import { alternarFavorito, avaliarAnuncio, iniciarConversa, registrarVisualizacao } from '@/services/actions';
 import {
   comodidadesDoAnuncio,
   deslocamentoAteCampus,
@@ -37,7 +36,7 @@ import { useEstudanteAtual } from '../useEstudanteAtual';
 
 export function AnuncioDetalhePage() {
   const { id = '' } = useParams();
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const toast = useToast();
   const navigate = useNavigate();
   const { user, estudante, campus, campusLabel } = useEstudanteAtual();
@@ -50,8 +49,8 @@ export function AnuncioDetalhePage() {
   useEffect(() => {
     if (viewed.current === id) return;
     viewed.current = id;
-    run((d) => registrarVisualizacao(d, id));
-  }, [id, run]);
+    void acoes.registrarVisualizacao(id);
+  }, [id, acoes]);
 
   const anuncio = getAnuncio(db, id);
   if (!anuncio || !anuncio.aprovado_moderacao) {
@@ -66,13 +65,13 @@ export function AnuncioDetalhePage() {
   const podeAvaliar = db.visitas.some((v) => v.estudante_id === user.id && v.anuncio_id === id && v.status === 'REALIZADA');
   const minhaAvaliacao = avaliacoes.find((a) => a.estudante_id === user.id);
 
-  const conversar = () => {
-    const r = run((d) => iniciarConversa(d, user.id, id));
+  const conversar = async () => {
+    const r = await acoes.iniciarConversa(user.id, id);
     if (r.ok) navigate(`/aluno/mensagens?conversa=${r.data}`);
   };
 
-  const avaliar = () => {
-    const r = run((d) => avaliarAnuncio(d, user.id, id, nota, comentario || undefined));
+  const avaliar = async () => {
+    const r = await acoes.avaliarAnuncio(user.id, id, nota, comentario || undefined);
     if (!r.ok) return toast.error(r.error);
     toast.success('Avaliação registrada. Obrigado!');
     setNota(0);
@@ -194,7 +193,7 @@ export function AnuncioDetalhePage() {
                 fullWidth
                 variant="outline"
                 icon={<Heart size={16} className={favorito ? 'fill-rose-500 text-rose-500' : ''} />}
-                onClick={() => run((d) => alternarFavorito(d, user.id, id))}
+                onClick={() => void acoes.alternarFavorito(user.id, id)}
               >
                 {favorito ? 'Salvo nos favoritos' : 'Salvar nos favoritos'}
               </Button>

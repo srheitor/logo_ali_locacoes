@@ -2,14 +2,13 @@ import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import { AnuncioCard } from '@/features/anuncios/components/AnuncioCard';
-import { alternarFavorito } from '@/services/actions';
 import { capaDoAnuncio, deslocamentoAteCampus, getAnuncio, mediaAvaliacoes } from '@/services/queries';
 import { AnuncioStatusBadge, Button, EmptyState, PageHeader } from '@/shared/components/ui';
 import { useEstudanteAtual } from '../useEstudanteAtual';
 
 /** RF07 — imóveis salvos pelo estudante (Consulta SQL 5). */
 export function FavoritosPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const { user, estudante } = useEstudanteAtual();
 
   const favoritos = db.favoritos
@@ -39,7 +38,7 @@ export function FavoritosPage() {
               estimativa={deslocamentoAteCampus(db, a, estudante?.campus_id)}
               avaliacao={mediaAvaliacoes(db, a.id)}
               favorito
-              onToggleFavorito={() => run((d) => alternarFavorito(d, user.id, a.id))}
+              onToggleFavorito={() => void acoes.alternarFavorito(user.id, a.id)}
               footer={a.status !== 'DISPONIVEL' && <div className="pt-1"><AnuncioStatusBadge status={a.status} /></div>}
             />
           ))}

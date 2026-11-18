@@ -3,7 +3,6 @@ import { Ban, Check, ClipboardCheck, X } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { ImovelImage } from '@/features/anuncios/components/ImovelImage';
-import { moderarAnuncio } from '@/services/actions';
 import { fotosDoAnuncio, getAnuncio, getUsuario } from '@/services/queries';
 import { PromptModal } from '@/shared/components/feedback/PromptModal';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -15,7 +14,7 @@ type Aba = 'pendentes' | 'publicados' | 'historico';
 
 /** RF10 — moderação de anúncios (Consulta SQL 9: histórico de moderação). */
 export function ModeracaoPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const admin = useCurrentUser();
   const toast = useToast();
   const [aba, setAba] = useState<Aba>('pendentes');
@@ -25,8 +24,8 @@ export function ModeracaoPage() {
   const publicados = db.anuncios.filter((a) => a.aprovado_moderacao);
   const historico = [...db.moderacoes].sort((a, b) => b.realizado_em.localeCompare(a.realizado_em));
 
-  const moderar = (anuncioId: string, acao: AcaoModeracao, justificativa?: string) => {
-    const r = run((d) => moderarAnuncio(d, anuncioId, admin.id, acao, justificativa));
+  const moderar = async (anuncioId: string, acao: AcaoModeracao, justificativa?: string) => {
+    const r = await acoes.moderarAnuncio(anuncioId, admin.id, acao, justificativa);
     if (!r.ok) return toast.error(r.error);
     toast.success(`Anúncio ${acao.toLowerCase()}.`);
     setAcaoPendente(undefined);

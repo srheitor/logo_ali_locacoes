@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Check, FileText, Mail, ShieldCheck, X } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
-import { analisarVerificacao } from '@/services/actions';
 import { getEstudante, getUsuario, nomeCampus } from '@/services/queries';
 import { PromptModal } from '@/shared/components/feedback/PromptModal';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -13,7 +12,7 @@ type Aba = 'PENDENTE' | 'analisadas';
 
 /** RN01 — análise manual das verificações com apenas um item enviado (Consulta SQL 8). */
 export function VerificacoesPage() {
-  const { db, run } = useData();
+  const { db, acoes } = useData();
   const admin = useCurrentUser();
   const toast = useToast();
   const [aba, setAba] = useState<Aba>('PENDENTE');
@@ -24,8 +23,8 @@ export function VerificacoesPage() {
   const analisadas = ordenadas.filter((v) => v.status !== 'PENDENTE');
   const lista = aba === 'PENDENTE' ? pendentes : analisadas;
 
-  const analisar = (id: string, aprovado: boolean, motivo?: string) => {
-    const r = run((d) => analisarVerificacao(d, id, admin.id, aprovado, motivo));
+  const analisar = async (id: string, aprovado: boolean, motivo?: string) => {
+    const r = await acoes.analisarVerificacao(id, admin.id, aprovado, motivo);
     if (!r.ok) return toast.error(r.error);
     toast.success(aprovado ? 'Vínculo aprovado.' : 'Vínculo reprovado.');
     setReprovarId(undefined);

@@ -4,3 +4,7 @@ dist
 .vite
 .DS_Store
 *.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.api

@@ -62,7 +62,7 @@ function navFor(role: TipoUsuario, db: Database, user: Usuario): NavItem[] {
 
 /** Layout das áreas logadas: escolhe o menu conforme o perfil do usuário. */
 export function RoleLayout() {
-  const { db, reset } = useData();
+  const { db, reset, fonte } = useData();
   const { logout } = useAuth();
   const user = useCurrentUser();
   const navigate = useNavigate();
@@ -78,14 +78,18 @@ export function RoleLayout() {
         navigate('/login');
       }}
       sidebarFooter={
-        <button
-          onClick={() => {
-            if (confirm('Restaurar todos os dados de demonstração? As alterações feitas serão perdidas.')) reset();
-          }}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-        >
-          <RotateCcw size={14} /> Restaurar dados da demo
-        </button>
+        fonte === 'api' ? (
+          <p className="px-3 py-2 text-xs text-slate-400">Dados: API · Supabase</p>
+        ) : (
+          <button
+            onClick={() => {
+              if (confirm('Restaurar todos os dados de demonstração? As alterações feitas serão perdidas.')) reset();
+            }}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          >
+            <RotateCcw size={14} /> Restaurar dados da demo
+          </button>
+        )
       }
     />
   );
