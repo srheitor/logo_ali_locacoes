@@ -34,6 +34,11 @@ jobs:
         env:
           # O site fica em https://<usuario>.github.io/<repositorio>/
           BASE_PATH: /${{ github.event.repository.name }}/
+          # Fonte de dados do site publicado (Settings → Secrets and variables → Actions → Variables):
+          #   VITE_FONTE_DADOS = api                                  → usa o backend (padrão: mock)
+          #   VITE_API_URL     = https://<servico>.onrender.com/api   → URL pública do backend
+          VITE_FONTE_DADOS: ${{ vars.VITE_FONTE_DADOS || 'mock' }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       # SPA: o Pages devolve 404.html para rotas como /aluno; uma cópia do index.html carrega o app nelas.
       - run: cp dist/index.html dist/404.html

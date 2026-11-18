@@ -1,0 +1,28 @@
+# Blueprint do Render (https://render.com/docs/blueprint-spec) — hospeda o backend (pasta backend/).
+# Uso: Render Dashboard → New → Blueprint → escolher este repositório.
+# As variáveis marcadas com `sync: false` são pedidas no painel na criação (nunca ficam no git).
+services:
+  - type: web
+    name: logo-ali-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    # devDependencies (TypeScript) são necessárias para compilar.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://srheitor.github.io
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      # Segredo dos tokens de sessão: o Render gera um valor aleatório.
+      - key: JWT_SECRET
+        generateValue: true

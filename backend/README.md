@@ -32,6 +32,26 @@ npm run dev               # http://localhost:3333/api
 | `npm run seed -- --limpar` | Remove os dados de demonstração e o que os usuários de demo criaram |
 | `npm run setup:storage` | Cria os buckets do Storage (idempotente) |
 
+## Deploy no Render
+
+O arquivo [`render.yaml`](../render.yaml), na raiz do repositório, descreve o serviço (plano gratuito, pasta `backend/`, build com `tsc`, health check em `/health`).
+
+1. Crie uma conta em <https://render.com> e conecte o GitHub.
+2. **New → Blueprint** → escolha este repositório. O Render lê o `render.yaml`.
+3. Preencha as variáveis pedidas:
+   - `SUPABASE_URL`: a mesma do `.env`.
+   - `SUPABASE_SECRET_KEY`: a chave secreta (`sb_secret_...`).
+
+   O `JWT_SECRET` é gerado pelo Render, e o `CORS_ORIGIN` já vem como `https://srheitor.github.io`.
+4. Aguarde o deploy e teste `https://<seu-servico>.onrender.com/health`, que deve responder `{"status":"ok"}`.
+5. No GitHub, configure as variáveis `VITE_FONTE_DADOS=api` e `VITE_API_URL=https://<seu-servico>.onrender.com/api` (ver o README principal) e rode o workflow de deploy do Pages.
+
+Observações:
+
+- **Hibernação:** no plano gratuito, o serviço "dorme" após cerca de 15 minutos sem uso, e o próximo acesso leva de 30 a 60 segundos. A tela de carregamento do front avisa sobre isso. Antes de uma apresentação, abra o site alguns minutos antes.
+- **Sessões:** como o `JWT_SECRET` do Render é diferente do local, quem estava logado precisa entrar de novo depois do primeiro deploy.
+- **Deploy automático:** com `autoDeploy: true`, cada push na branch configurada no Render (normalmente a `main`) gera um novo deploy.
+
 ## Estrutura
 
 ```
