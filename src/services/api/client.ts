@@ -3,7 +3,9 @@
  * Guarda a sessão no localStorage, envia o token em cada requisição
  * e renova a sessão automaticamente quando o token de acesso expira.
  */
-export const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3333/api').replace(/\/+$/, '');
+const urlConfigurada = (import.meta.env.VITE_API_URL || 'http://localhost:3333/api').trim().replace(/\/+$/, '');
+/** Todas as rotas do backend ficam sob /api; aceita a URL configurada com ou sem esse sufixo. */
+export const API_URL = urlConfigurada.endsWith('/api') ? urlConfigurada : `${urlConfigurada}/api`;
 
 const SESSAO_KEY = 'logoali:api:sessao';
 
