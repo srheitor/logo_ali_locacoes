@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372 80" role="img" aria-label="LogoAlí — locação para estudantes">
+  <defs>
+    <linearGradient id="pinH" x1="8" y1="3" x2="56" y2="61" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F7A63"/>
+      <stop offset="1" stop-color="#2FBF9B"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(8 8)">
+    <path d="M32 3C18.75 3 8 13.75 8 27c0 17.5 24 34 24 34s24-16.5 24-34C56 13.75 45.25 3 32 3Z" fill="url(#pinH)"/>
+    <path d="M32 17 45 29h-4v13H23V29h-4L32 17Z" fill="#F6F4EF"/>
+    <rect x="29.5" y="33" width="5" height="9" rx="1.2" fill="#F5A524"/>
+  </g>
+  <text x="88" y="54" font-family="Manrope, Inter, 'Segoe UI', system-ui, sans-serif" font-size="42" font-weight="800" letter-spacing="-1">
+    <tspan fill="#0B3D33">Logo</tspan><tspan fill="#0F7A63">Alí</tspan>
+  </text>
+</svg>
