@@ -160,7 +160,12 @@ function ApiDataProvider({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="max-w-md text-center">
           {estado === 'carregando' ? (
-            <p className="text-sm text-slate-500">Carregando dados do servidor…</p>
+            <>
+              <p className="text-sm text-slate-500">Carregando dados do servidor…</p>
+              <p className="mt-1 text-xs text-slate-400">
+                Se o servidor estava parado, o primeiro acesso pode levar até 1 minuto.
+              </p>
+            </>
           ) : (
             <>
               <p className="font-semibold text-slate-800">Não foi possível carregar os dados da API.</p>

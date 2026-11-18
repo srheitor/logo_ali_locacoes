@@ -44,6 +44,15 @@ Configuração única no repositório: **Settings → Pages → Build and deploy
 
 O workflow compila com `BASE_PATH=/<nome-do-repo>/` (o site fica numa subpasta) e cria um `404.html` para que links diretos como `/aluno/favoritos` funcionem.
 
+**Fonte de dados do site publicado:** por padrão, o site usa os dados mockados. Para ligá-lo ao banco, hospede o backend (ver [backend/README.md › Deploy no Render](backend/README.md#deploy-no-render)) e crie em **Settings → Secrets and variables → Actions → Variables**:
+
+| Variável | Valor |
+| --- | --- |
+| `VITE_FONTE_DADOS` | `api` |
+| `VITE_API_URL` | `https://<seu-servico>.onrender.com/api` |
+
+Depois rode o workflow de novo (**Actions → Deploy GitHub Pages → Run workflow**). Para voltar ao modo mock, apague `VITE_FONTE_DADOS` ou troque o valor para `mock`.
+
 ### Usuários de demonstração (senha `123456`)
 
 | Login          | Perfil        | Quem é                                       |
