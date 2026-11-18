@@ -153,7 +153,7 @@ const { status, endereco, error } = useCepLookup(cep, { onFound: (e) => preenche
 | RF01 Cadastro com perfis | `features/auth/pages/CadastroPage.tsx` |
 | RF02 Universidade e campus | Cadastro e perfil do aluno |
 | RF03 Cadastro de imóvel (mín. 3 fotos) | `proprietario/pages/AnuncioFormPage.tsx` |
-| RF04 Distância e tempo até o campus | `shared/utils/geo.ts` + `DeslocamentoInfo` |
+| RF04 Distância e tempo até o campus | `shared/utils/geo.ts` + `DeslocamentoInfo`; rota pelas ruas no mapa via [OSRM](https://project-osrm.org) (`services/rotas.ts`, `RotaInfo`) |
 | RF05 Filtros de busca | `aluno/pages/BuscaPage.tsx` |
 | RF06 Lista e mapa interativo | `anuncios/components/AnunciosMap.tsx` |
 | RF07 Favoritos | `aluno/pages/FavoritosPage.tsx` |
@@ -170,4 +170,5 @@ const { status, endereco, error } = useCepLookup(cep, { onFound: (e) => preenche
 - Hoje, no modo API, as telas leem um "snapshot" (`GET /api/snapshot`) no mesmo formato dos mocks. Com mais volume de dados, cada tela deve passar a usar as rotas específicas da API (busca paginada, conversas etc.).
 - Criar os buckets do Storage (`npm run setup:storage` no backend) para o envio de fotos e comprovantes no modo API.
 - `cpf` e `data_nascimento` foram adicionados ao usuário no protótipo — avaliar incluí-los no modelo lógico.
-- Substituir a estimativa de tempo de deslocamento por uma API de rotas real.
+- A rota no mapa vem do servidor público do OSRM (`router.project-osrm.org`), que só calcula trajetos de carro e pede uso moderado; as rotas ficam em cache no navegador por 7 dias. Para rotas a pé ou mais volume, apontar `VITE_OSRM_URL` para outro servidor OSRM (ex.: o da FOSSGIS, com perfil a pé, ou um próprio).
+- Os tempos a pé e de ônibus ainda são estimativas (velocidade média), e as linhas de ônibus não são exibidas.

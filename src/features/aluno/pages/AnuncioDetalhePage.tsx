@@ -16,6 +16,8 @@ import {
 import { useData } from '@/app/providers/DataProvider';
 import { AnunciosMap } from '@/features/anuncios/components/AnunciosMap';
 import { DeslocamentoInfo } from '@/features/anuncios/components/DeslocamentoInfo';
+import { RotaInfo } from '@/features/anuncios/components/RotaInfo';
+import { useRotaAteCampus } from '@/features/anuncios/useRotaAteCampus';
 import { FotoGaleria } from '@/features/anuncios/components/FotoGaleria';
 import {
   comodidadesDoAnuncio,
@@ -53,6 +55,8 @@ export function AnuncioDetalhePage() {
   }, [id, acoes]);
 
   const anuncio = getAnuncio(db, id);
+  // RF04 — rota pelas ruas até o campus do estudante (hook antes de qualquer retorno antecipado).
+  const estadoRota = useRotaAteCampus(anuncio, campus);
   if (!anuncio || !anuncio.aprovado_moderacao) {
     return <EmptyState icon={<Eye size={24} />} title="Anúncio não encontrado" action={<Link to="/aluno"><Button variant="outline">Voltar à busca</Button></Link>} />;
   }
@@ -134,9 +138,16 @@ export function AnuncioDetalhePage() {
 
           <Card className="overflow-hidden">
             <CardHeader title="Localização" subtitle={<DeslocamentoInfo estimativa={estimativa} />} />
-            <div className="h-72">
-              <AnunciosMap anuncios={[anuncio]} campus={campus} campusLabel={campusLabel} selectedId={anuncio.id} />
+            <div className="h-80">
+              <AnunciosMap
+                anuncios={[anuncio]}
+                campus={campus}
+                campusLabel={campusLabel}
+                selectedId={anuncio.id}
+                rota={estadoRota?.status === 'ok' ? estadoRota.rota.trajeto : undefined}
+              />
             </div>
+            <RotaInfo estado={estadoRota} className="border-t border-slate-100 px-5 py-3" />
           </Card>
 
           <Card>

@@ -3,6 +3,8 @@ import { LayoutList, Map as MapIcon, Columns2, SearchX, SlidersHorizontal, Gradu
 import { useData } from '@/app/providers/DataProvider';
 import { AnuncioCard } from '@/features/anuncios/components/AnuncioCard';
 import { AnunciosMap } from '@/features/anuncios/components/AnunciosMap';
+import { RotaInfo } from '@/features/anuncios/components/RotaInfo';
+import { useRotaAteCampus } from '@/features/anuncios/useRotaAteCampus';
 import { anunciosPublicos, capaDoAnuncio, deslocamentoAteCampus, isFavorito, mediaAvaliacoes } from '@/services/queries';
 import { CurrencyInput, SelectInput, Toggle } from '@/shared/components/form';
 import { useToast } from '@/shared/components/feedback/Toast';
@@ -62,6 +64,10 @@ export function BuscaPage() {
         return (x.estimativa?.distanciaKm ?? 0) - (y.estimativa?.distanciaKm ?? 0);
       });
   }, [db, filtros, estudante?.campus_id]);
+
+  // Rota pelas ruas do anúncio selecionado até o campus (espera o mouse parar para consultar o OSRM).
+  const selecionado = resultados.find((r) => r.anuncio.id === selectedId)?.anuncio;
+  const estadoRota = useRotaAteCampus(view === 'lista' ? undefined : selecionado, campus, { atrasoMs: 400 });
 
   const toggleFav = async (anuncioId: string) => {
     const r = await acoes.alternarFavorito(user.id, anuncioId);
@@ -174,7 +180,7 @@ export function BuscaPage() {
             </div>
           )}
           {view !== 'lista' && (
-            <div className={cn('overflow-hidden rounded-xl border border-slate-200 shadow-sm', view === 'mapa' ? 'h-[70vh]' : 'hidden h-[calc(100vh-8rem)] xl:sticky xl:top-8 xl:block')}>
+            <div className={cn('relative overflow-hidden rounded-xl border border-slate-200 shadow-sm', view === 'mapa' ? 'h-[70vh]' : 'hidden h-[calc(100vh-8rem)] xl:sticky xl:top-8 xl:block')}>
               <AnunciosMap
                 anuncios={resultados.map((r) => r.anuncio)}
                 campus={campus}
@@ -182,7 +188,14 @@ export function BuscaPage() {
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 linkTo={(id) => `/aluno/anuncios/${id}`}
+                rota={estadoRota?.status === 'ok' ? estadoRota.rota.trajeto : undefined}
               />
+              {selecionado && estadoRota && (
+                <div className="absolute left-14 right-3 top-3 z-[1000] rounded-xl border border-slate-200 bg-white/95 px-3 py-2 shadow-lg backdrop-blur">
+                  <p className="mb-1 truncate text-xs font-medium text-slate-700">{selecionado.titulo} → {campusLabel}</p>
+                  <RotaInfo estado={estadoRota} />
+                </div>
+              )}
             </div>
           )}
         </div>

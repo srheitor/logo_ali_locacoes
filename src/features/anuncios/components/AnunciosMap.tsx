@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import L from 'leaflet';
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Anuncio, Campus } from '@/shared/types/domain';
 import { formatCurrency } from '@/shared/utils';
@@ -41,16 +41,21 @@ interface AnunciosMapProps {
   selectedId?: string;
   onSelect?: (id: string) => void;
   linkTo?: (id: string) => string;
+  /** Rota pelas ruas até o campus ([lat, lng]), desenhada como linha. */
+  rota?: Array<[number, number]>;
   className?: string;
 }
 
 /** RF06 — mapa interativo com marcadores dos imóveis e do campus do estudante. */
-export function AnunciosMap({ anuncios, campus, campusLabel, selectedId, onSelect, linkTo, className }: AnunciosMapProps) {
+export function AnunciosMap({ anuncios, campus, campusLabel, selectedId, onSelect, linkTo, rota, className }: AnunciosMapProps) {
   const points = useMemo(() => {
-    const pts: Array<[number, number]> = anuncios.map((a) => [a.latitude, a.longitude]);
+    // Com uma rota, o enquadramento foca no imóvel selecionado, no campus e no caminho entre eles.
+    const base = rota && selectedId ? anuncios.filter((a) => a.id === selectedId) : anuncios;
+    const pts: Array<[number, number]> = base.map((a) => [a.latitude, a.longitude]);
     if (campus) pts.push([campus.latitude, campus.longitude]);
+    if (rota) pts.push(...rota);
     return pts;
-  }, [anuncios, campus]);
+  }, [anuncios, campus, rota, selectedId]);
 
   return (
     <MapContainer center={[-21.7642, -43.3496]} zoom={14} scrollWheelZoom className={className ?? 'h-full w-full'}>
@@ -59,6 +64,13 @@ export function AnunciosMap({ anuncios, campus, campusLabel, selectedId, onSelec
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FitBounds points={points} />
+      {rota && (
+        <>
+          {/* contorno branco por baixo para a linha se destacar sobre o mapa */}
+          <Polyline positions={rota} pathOptions={{ color: '#ffffff', weight: 8, opacity: 0.9 }} />
+          <Polyline positions={rota} pathOptions={{ color: '#0d9488', weight: 5, opacity: 0.95 }} />
+        </>
+      )}
       {campus && (
         <Marker position={[campus.latitude, campus.longitude]} icon={campusIcon} zIndexOffset={1000}>
           <Popup>
