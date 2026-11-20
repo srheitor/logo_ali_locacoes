@@ -18,10 +18,12 @@ import { MeusAnunciosPage } from '@/features/proprietario/pages/MeusAnunciosPage
 import { PainelProprietarioPage } from '@/features/proprietario/pages/PainelProprietarioPage';
 import { VisitasRecebidasPage } from '@/features/proprietario/pages/VisitasRecebidasPage';
 import { PresentationPage } from '@/features/public/pages/PresentationPage';
+import { DemoPage } from '@/features/public/pages/DemoPage';
 import { RoleLayout } from './layouts/RoleLayout';
 
 export const router = createBrowserRouter([
   { path: '/', element: <PresentationPage /> },
+  { path: '/demo', element: <DemoPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/cadastro', element: <CadastroPage /> },
 

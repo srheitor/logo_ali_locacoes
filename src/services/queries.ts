@@ -11,6 +11,9 @@ export const getProprietario = (db: Database, id: Id) => db.proprietarios.find((
 export const getAnuncio = (db: Database, id: Id) => db.anuncios.find((a) => a.id === id);
 export const getCampus = (db: Database, id: Id) => db.campi.find((c) => c.id === id);
 export const getInstituicao = (db: Database, id: Id) => db.instituicoes.find((i) => i.id === id);
+/** Sede administrativa usada como referência no filtro por faculdade. */
+export const getCampusDaInstituicao = (db: Database, instituicaoId: Id) =>
+  db.campi.find((c) => c.instituicao_id === instituicaoId);
 
 /** "UFJF – Campus Sede" */
 export function nomeCampus(db: Database, campusId: Id) {

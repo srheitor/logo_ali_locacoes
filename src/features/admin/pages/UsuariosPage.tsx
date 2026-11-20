@@ -29,7 +29,7 @@ export function UsuariosPage() {
   return (
     <>
       <PageHeader title="Usuários" subtitle={`${db.usuarios.length} usuários cadastrados`} />
-      <Card className="mb-4 grid gap-3 p-4 sm:grid-cols-[1fr_220px]">
+      <Card className="mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-[1fr_220px]">
         <TextInput value={busca} onChange={setBusca} placeholder="Buscar por nome ou e-mail" leftIcon={<Search size={16} />} />
         <SelectInput
           value={tipo}

@@ -18,7 +18,7 @@ export function RotaInfo({ estado, className }: { estado?: EstadoRota; className
     <div className={cn('flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600', className)}>
       {estado.status === 'carregando' && (
         <span className={cn(item, 'text-slate-500')}>
-          <Loader2 size={14} className="animate-spin" /> Calculando a rota até o campus…
+          <Loader2 size={14} className="animate-spin" /> Calculando a rota até o destino…
         </span>
       )}
       {estado.status === 'erro' && (

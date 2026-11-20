@@ -69,7 +69,7 @@ export function PerfilPage() {
   return (
     <>
       <PageHeader title="Meu perfil" />
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
         <Card className="flex flex-col items-center p-6 text-center lg:self-start">
           <Avatar name={user.nome} size="lg" />
           <h2 className="mt-3 font-semibold text-slate-900">{user.nome}</h2>
@@ -84,7 +84,7 @@ export function PerfilPage() {
         <Card>
           <CardHeader title="Dados pessoais" />
           <CardBody>
-            <form onSubmit={salvar} className="grid gap-4 sm:grid-cols-2" noValidate>
+            <form onSubmit={salvar} className="grid grid-cols-1 gap-4 sm:grid-cols-2" noValidate>
               <TextInput label="Nome completo" required className="sm:col-span-2" {...form.field('nome')} />
               <EmailInput value={user.email} onChange={() => {}} disabled hint="O e-mail de acesso não pode ser alterado." />
               <PhoneInput required {...form.field('telefone')} />

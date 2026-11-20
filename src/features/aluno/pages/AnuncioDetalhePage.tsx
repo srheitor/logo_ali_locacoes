@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   BedDouble,
@@ -24,15 +24,17 @@ import {
   deslocamentoAteCampus,
   fotosDoAnuncio,
   getAnuncio,
+  getCampusDaInstituicao,
   getUsuario,
   isFavorito,
   mediaAvaliacoes,
+  nomeCampus,
   regrasDoAnuncio,
 } from '@/services/queries';
 import { TextAreaInput } from '@/shared/components/form';
 import { useToast } from '@/shared/components/feedback/Toast';
 import { Avatar, Badge, Button, Card, CardBody, CardHeader, EmptyState, StarRating } from '@/shared/components/ui';
-import { cn, formatCurrency, formatDate, tipoImovelLabel } from '@/shared/utils';
+import { cn, formatCurrency, formatDate, formatKm, tipoImovelLabel } from '@/shared/utils';
 import { AgendarVisitaModal } from '../components/AgendarVisitaModal';
 import { useEstudanteAtual } from '../useEstudanteAtual';
 
@@ -41,6 +43,8 @@ export function AnuncioDetalhePage() {
   const { db, acoes } = useData();
   const toast = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const faculdadeId = searchParams.get('faculdade') ?? '';
   const { user, estudante, campus, campusLabel } = useEstudanteAtual();
   const [agendarOpen, setAgendarOpen] = useState(false);
   const [nota, setNota] = useState(0);
@@ -55,14 +59,18 @@ export function AnuncioDetalhePage() {
   }, [id, acoes]);
 
   const anuncio = getAnuncio(db, id);
-  // RF04 — rota pelas ruas até o campus do estudante (hook antes de qualquer retorno antecipado).
-  const estadoRota = useRotaAteCampus(anuncio, campus);
+  const instituicaoFiltro = faculdadeId ? db.instituicoes.find((i) => i.id === faculdadeId) : undefined;
+  const campusFiltro = instituicaoFiltro ? getCampusDaInstituicao(db, instituicaoFiltro.id) : undefined;
+  const campusReferencia = campusFiltro ?? campus;
+  const campusReferenciaLabel = campusFiltro ? nomeCampus(db, campusFiltro.id) : campusLabel;
+  // RF04 — rota pelas ruas até o campus/faculdade de referência (hook antes de qualquer retorno antecipado).
+  const estadoRota = useRotaAteCampus(anuncio, campusReferencia);
   if (!anuncio || !anuncio.aprovado_moderacao) {
     return <EmptyState icon={<Eye size={24} />} title="Anúncio não encontrado" action={<Link to="/aluno"><Button variant="outline">Voltar à busca</Button></Link>} />;
   }
 
   const proprietario = getUsuario(db, anuncio.proprietario_id);
-  const estimativa = deslocamentoAteCampus(db, anuncio, estudante?.campus_id);
+  const estimativa = deslocamentoAteCampus(db, anuncio, campusReferencia?.id);
   const avaliacoes = db.avaliacoes.filter((a) => a.anuncio_id === id);
   const { media, total } = mediaAvaliacoes(db, id);
   const favorito = isFavorito(db, user.id, id);
@@ -82,13 +90,35 @@ export function AnuncioDetalhePage() {
     setComentario('');
   };
 
+  const linkVerificacao = !estudante?.verificado && (
+    <Link to="/aluno/verificacao" className="mt-4 flex gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 hover:bg-amber-100">
+      <ShieldAlert size={16} className="shrink-0" />
+      Verifique seu vínculo estudantil para passar mais confiança aos proprietários.
+    </Link>
+  );
+
+  const botoesAcao = (
+    <div className="mt-4 space-y-2">
+      <Button fullWidth icon={<CalendarPlus size={16} />} onClick={() => setAgendarOpen(true)}>Agendar visita</Button>
+      <Button fullWidth variant="secondary" icon={<MessageCircle size={16} />} onClick={conversar}>Conversar com o proprietário</Button>
+      <Button
+        fullWidth
+        variant="outline"
+        icon={<Heart size={16} className={favorito ? 'fill-rose-500 text-rose-500' : ''} />}
+        onClick={() => void acoes.alternarFavorito(user.id, id)}
+      >
+        {favorito ? 'Salvo nos favoritos' : 'Salvar nos favoritos'}
+      </Button>
+    </div>
+  );
+
   return (
     <>
-      <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
+      <button onClick={() => navigate(-1)} className="-ml-2 mb-4 inline-flex items-center gap-1 rounded-lg px-2 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800">
         <ArrowLeft size={16} /> Voltar
       </button>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div className="min-w-0 space-y-6">
           <FotoGaleria fotos={fotosDoAnuncio(db, id)} titulo={anuncio.titulo} />
 
@@ -111,12 +141,36 @@ export function AnuncioDetalhePage() {
             </div>
           </div>
 
+          {/* Preço e ações logo no início no mobile */}
+          <Card className="p-4 lg:hidden">
+            <p className="text-2xl font-bold text-slate-900">
+              {formatCurrency(anuncio.valor_aluguel)}
+              <span className="text-sm font-normal text-slate-500"> /mês</span>
+            </p>
+            <DeslocamentoInfo estimativa={estimativa} className="mt-1" rotulo={campusFiltro ? 'da sede' : 'do campus'} />
+            {campusReferenciaLabel && <p className="mt-1 text-xs text-slate-400">Até {campusReferenciaLabel}</p>}
+            {botoesAcao}
+            {linkVerificacao}
+            {proprietario && (
+              <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3">
+                <Avatar name={proprietario.nome} size="sm" />
+                <div className="min-w-0">
+                  <p className="text-xs text-slate-500">Anunciado por</p>
+                  <p className="truncate text-sm font-semibold text-slate-800">{proprietario.nome}</p>
+                </div>
+              </div>
+            )}
+            <p className="mt-3 text-xs text-slate-400">
+              Publicado em {formatDate(anuncio.data_publicacao)} · válido até {formatDate(anuncio.data_expiracao)}
+            </p>
+          </Card>
+
           <Card>
             <CardHeader title="Descrição" />
             <CardBody><p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">{anuncio.descricao}</p></CardBody>
           </Card>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <Card>
               <CardHeader title="Comodidades" />
               <CardBody className="flex flex-wrap gap-2">
@@ -137,12 +191,12 @@ export function AnuncioDetalhePage() {
           </div>
 
           <Card className="overflow-hidden">
-            <CardHeader title="Localização" subtitle={<DeslocamentoInfo estimativa={estimativa} />} />
-            <div className="h-80">
+            <CardHeader title="Localização" subtitle={<DeslocamentoInfo estimativa={estimativa} rotulo={campusFiltro ? 'da sede' : 'do campus'} />} />
+            <div className="h-64 sm:h-80">
               <AnunciosMap
                 anuncios={[anuncio]}
-                campus={campus}
-                campusLabel={campusLabel}
+                campus={campusReferencia}
+                campusLabel={campusReferenciaLabel}
                 selectedId={anuncio.id}
                 rota={estadoRota?.status === 'ok' ? estadoRota.rota.trajeto : undefined}
               />
@@ -187,34 +241,17 @@ export function AnuncioDetalhePage() {
           </Card>
         </div>
 
-        {/* Coluna lateral: preço e ações */}
-        <div className="space-y-4 lg:sticky lg:top-8 lg:self-start">
+        {/* Coluna lateral: preço e ações (desktop) */}
+        <div className="hidden space-y-4 lg:sticky lg:top-8 lg:block lg:self-start">
           <Card className="p-5">
             <p className="text-3xl font-bold text-slate-900">
               {formatCurrency(anuncio.valor_aluguel)}
               <span className="text-base font-normal text-slate-500"> /mês</span>
             </p>
-            <DeslocamentoInfo estimativa={estimativa} className="mt-2" />
-            {campusLabel && <p className="mt-1 text-xs text-slate-400">Até {campusLabel}</p>}
-
-            <div className="mt-5 space-y-2">
-              <Button fullWidth icon={<CalendarPlus size={16} />} onClick={() => setAgendarOpen(true)}>Agendar visita</Button>
-              <Button fullWidth variant="secondary" icon={<MessageCircle size={16} />} onClick={conversar}>Conversar com o proprietário</Button>
-              <Button
-                fullWidth
-                variant="outline"
-                icon={<Heart size={16} className={favorito ? 'fill-rose-500 text-rose-500' : ''} />}
-                onClick={() => void acoes.alternarFavorito(user.id, id)}
-              >
-                {favorito ? 'Salvo nos favoritos' : 'Salvar nos favoritos'}
-              </Button>
-            </div>
-            {!estudante?.verificado && (
-              <Link to="/aluno/verificacao" className="mt-4 flex gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 hover:bg-amber-100">
-                <ShieldAlert size={16} className="shrink-0" />
-                Verifique seu vínculo estudantil para passar mais confiança aos proprietários.
-              </Link>
-            )}
+            <DeslocamentoInfo estimativa={estimativa} className="mt-2" rotulo={campusFiltro ? 'da sede' : 'do campus'} />
+            {campusReferenciaLabel && <p className="mt-1 text-xs text-slate-400">Até {campusReferenciaLabel}</p>}
+            {botoesAcao}
+            {linkVerificacao}
           </Card>
 
           {proprietario && (
@@ -230,6 +267,31 @@ export function AnuncioDetalhePage() {
           <p className="px-1 text-xs text-slate-400">
             Publicado em {formatDate(anuncio.data_publicacao)} · válido até {formatDate(anuncio.data_expiracao)}
           </p>
+        </div>
+      </div>
+
+      {/* Barra fixa de ações no mobile */}
+      <div className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-2 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-3xl items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-bold leading-tight text-slate-900">
+              {formatCurrency(anuncio.valor_aluguel)}
+              <span className="text-xs font-normal text-slate-500"> /mês</span>
+            </p>
+            <p className="truncate text-[11px] text-slate-500">
+              {estimativa ? `${formatKm(estimativa.distanciaKm)} ${campusFiltro ? 'da sede' : 'do campus'}` : campusReferenciaLabel}
+            </p>
+          </div>
+          <button
+            onClick={() => void acoes.alternarFavorito(user.id, id)}
+            aria-label={favorito ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-50"
+          >
+            <Heart size={20} className={favorito ? 'fill-rose-500 text-rose-500' : ''} />
+          </button>
+          <Button className="shrink-0" icon={<CalendarPlus size={16} />} onClick={() => setAgendarOpen(true)}>
+            Agendar
+          </Button>
         </div>
       </div>
 

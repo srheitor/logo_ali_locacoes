@@ -52,7 +52,7 @@ export function ChatPage({ anuncioLink }: ChatPageProps) {
   return (
     <>
       <PageHeader title="Mensagens" subtitle={<span className="inline-flex items-center gap-1"><Lock size={13} /> Seus dados de contato não são compartilhados.</span>} />
-      <Card className="grid h-[calc(100vh-12rem)] min-h-[480px] overflow-hidden md:grid-cols-[320px_1fr]">
+      <Card className="grid h-[calc(100dvh-15rem)] min-h-[420px] overflow-hidden md:h-[calc(100vh-12rem)] md:min-h-[480px] md:grid-cols-[320px_1fr]">
         {/* Lista de conversas */}
         <div className={cn('flex-col overflow-y-auto border-r border-slate-200', ativa ? 'hidden md:flex' : 'flex')}>
           {conversas.map(({ conversa, anuncio, outro, ultima, naoLidas }) => (

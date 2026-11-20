@@ -159,7 +159,7 @@ export function AnuncioFormPage() {
       <form onSubmit={salvar} className="space-y-6" noValidate>
         <Card>
           <CardHeader title="Informações do imóvel" />
-          <CardBody className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <CardBody className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <TextInput label="Título do anúncio" required className="sm:col-span-2 lg:col-span-4" placeholder="Ex.: Kitnet mobiliada perto da UFJF" {...form.field('titulo')} />
             <SelectInput
               label="Tipo de imóvel"
@@ -180,8 +180,8 @@ export function AnuncioFormPage() {
 
         <Card>
           <CardHeader title="Endereço e localização" subtitle="Digite o CEP para preencher o endereço e clique no mapa para posicionar o imóvel." />
-          <CardBody className="grid gap-4 lg:grid-cols-2">
-            <div className="grid content-start gap-4 sm:grid-cols-2">
+          <CardBody className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 content-start gap-4 sm:grid-cols-2">
               <CepInput required onAddressFound={onAddressFound} className="sm:col-span-2" {...form.field('cep')} />
               <TextInput id="anuncio-logradouro" label="Rua / avenida" required className="sm:col-span-2" {...form.field('logradouro')} />
               <TextInput id="anuncio-numero" label="Número" required placeholder="Ex.: 120 ou s/n" {...form.field('numero')} />
@@ -206,7 +206,7 @@ export function AnuncioFormPage() {
           </CardBody>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader title="Comodidades" />
             <CardBody className="flex flex-wrap gap-2">
@@ -235,7 +235,7 @@ export function AnuncioFormPage() {
                     onChange={(e) => setNovaRegra(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addRegra())}
                     placeholder="Ex.: Silêncio após as 22h"
-                    className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                    className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                   />
                   <Button variant="secondary" icon={<Plus size={16} />} onClick={addRegra}>Adicionar</Button>
                 </div>

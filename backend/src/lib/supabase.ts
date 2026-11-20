@@ -1,13 +1,18 @@
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
 import { env } from '../config/env.js';
 
 /**
  * Cliente com a chave secreta: ignora a RLS e é usado em TODAS as consultas do backend.
  * As regras de permissão (quem pode ler/alterar o quê) ficam nos services.
+ *
+ * `ws` é passado como transporte do Realtime porque o backend não usa WebSocket e o
+ * Node.js 20 não tem implementação nativa (o supabase-js exige Node 22+).
  */
 export const supabaseAdmin = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  realtime: { transport: WebSocket as any },
 });
 
 /**

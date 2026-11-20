@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Search,
   ShieldQuestion,
+  Sparkles,
   UserRound,
   Users,
 } from 'lucide-react';
@@ -27,17 +28,18 @@ function navFor(role: TipoUsuario, db: Database, user: Usuario): NavItem[] {
   switch (role) {
     case 'ESTUDANTE':
       return [
-        { to: '/aluno', label: 'Buscar imóveis', icon: <Search size={18} />, end: true },
-        { to: '/aluno/favoritos', label: 'Favoritos', icon: <Heart size={18} />, badge: db.favoritos.filter((f) => f.estudante_id === user.id).length },
-        { to: '/aluno/visitas', label: 'Minhas visitas', icon: <CalendarDays size={18} /> },
-        { to: '/aluno/mensagens', label: 'Mensagens', icon: <MessageCircle size={18} />, badge: naoLidas },
+        { to: '/aluno', label: 'Buscar imóveis', icon: <Search size={18} />, end: true, mobile: true, mobileLabel: 'Buscar' },
+        { to: '/aluno/favoritos', label: 'Favoritos', icon: <Heart size={18} />, badge: db.favoritos.filter((f) => f.estudante_id === user.id).length, mobile: true },
+        { to: '/aluno/visitas', label: 'Minhas visitas', icon: <CalendarDays size={18} />, mobile: true, mobileLabel: 'Visitas' },
+        { to: '/aluno/mensagens', label: 'Mensagens', icon: <MessageCircle size={18} />, badge: naoLidas, mobile: true },
         { to: '/aluno/verificacao', label: 'Verificação', icon: <BadgeCheck size={18} /> },
         { to: '/aluno/perfil', label: 'Meu perfil', icon: <UserRound size={18} /> },
+        { to: '/demo', label: 'Modo apresentação', icon: <Sparkles size={18} /> },
       ];
     case 'PROPRIETARIO':
       return [
-        { to: '/proprietario', label: 'Painel', icon: <LayoutDashboard size={18} />, end: true },
-        { to: '/proprietario/anuncios', label: 'Meus anúncios', icon: <Building2 size={18} /> },
+        { to: '/proprietario', label: 'Painel', icon: <LayoutDashboard size={18} />, end: true, mobile: true },
+        { to: '/proprietario/anuncios', label: 'Meus anúncios', icon: <Building2 size={18} />, mobile: true, mobileLabel: 'Anúncios' },
         {
           to: '/proprietario/visitas',
           label: 'Visitas',
@@ -45,17 +47,20 @@ function navFor(role: TipoUsuario, db: Database, user: Usuario): NavItem[] {
           badge: db.visitas.filter(
             (v) => v.status === 'SOLICITADA' && db.anuncios.find((a) => a.id === v.anuncio_id)?.proprietario_id === user.id,
           ).length,
+          mobile: true,
         },
-        { to: '/proprietario/mensagens', label: 'Mensagens', icon: <MessageCircle size={18} />, badge: naoLidas },
+        { to: '/proprietario/mensagens', label: 'Mensagens', icon: <MessageCircle size={18} />, badge: naoLidas, mobile: true },
         { to: '/proprietario/perfil', label: 'Meu perfil', icon: <UserRound size={18} /> },
+        { to: '/demo', label: 'Modo apresentação', icon: <Sparkles size={18} /> },
       ];
     case 'ADMIN':
       return [
-        { to: '/admin', label: 'Painel', icon: <LayoutDashboard size={18} />, end: true },
-        { to: '/admin/moderacao', label: 'Moderação', icon: <ClipboardCheck size={18} />, badge: db.anuncios.filter((a) => !a.aprovado_moderacao).length },
-        { to: '/admin/verificacoes', label: 'Verificações', icon: <ShieldQuestion size={18} />, badge: db.vinculos.filter((v) => v.status === 'PENDENTE').length },
-        { to: '/admin/usuarios', label: 'Usuários', icon: <Users size={18} /> },
+        { to: '/admin', label: 'Painel', icon: <LayoutDashboard size={18} />, end: true, mobile: true },
+        { to: '/admin/moderacao', label: 'Moderação', icon: <ClipboardCheck size={18} />, badge: db.anuncios.filter((a) => !a.aprovado_moderacao).length, mobile: true },
+        { to: '/admin/verificacoes', label: 'Verificações', icon: <ShieldQuestion size={18} />, badge: db.vinculos.filter((v) => v.status === 'PENDENTE').length, mobile: true, mobileLabel: 'Vínculos' },
+        { to: '/admin/usuarios', label: 'Usuários', icon: <Users size={18} />, mobile: true },
         { to: '/admin/perfil', label: 'Meu perfil', icon: <UserRound size={18} /> },
+        { to: '/demo', label: 'Modo apresentação', icon: <Sparkles size={18} /> },
       ];
   }
 }

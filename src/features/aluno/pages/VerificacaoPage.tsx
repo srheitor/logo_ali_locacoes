@@ -45,7 +45,7 @@ export function VerificacaoPage() {
     <>
       <PageHeader title="Verificação de vínculo estudantil" subtitle="Estudantes verificados passam mais confiança aos proprietários." />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <Card className="flex items-center gap-4 p-5">
             <div className={`rounded-xl p-3 ${status.cls}`}>{status.icon}</div>

@@ -12,6 +12,10 @@ export interface NavItem {
   /** Número exibido ao lado do item (ex.: mensagens não lidas). */
   badge?: number;
   end?: boolean;
+  /** Aparece na barra de navegação inferior do mobile (até 4 itens). */
+  mobile?: boolean;
+  /** Texto curto usado na barra inferior. */
+  mobileLabel?: string;
 }
 
 interface AppLayoutProps {
@@ -30,6 +34,14 @@ export function AppLayout({ navItems, userName, userRole, userPhoto, onLogout, s
   const location = useLocation();
 
   useEffect(() => setOpen(false), [location.pathname]);
+
+  const mobileItems = navItems.filter((item) => item.mobile);
+  const mobileAtivo = mobileItems.some((item) =>
+    item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
+  );
+  // Telas que já têm uma barra de ação fixa própria ou precisam de toda a altura.
+  const hideMobileNav =
+    location.pathname.startsWith('/aluno/anuncios/') || location.pathname.endsWith('/mensagens');
 
   const sidebar = (
     <div className="flex h-full flex-col">
@@ -55,7 +67,7 @@ export function AppLayout({ navItems, userName, userRole, userPhoto, onLogout, s
             {item.icon}
             <span className="flex-1">{item.label}</span>
             {!!item.badge && (
-              <span className="rounded-full bg-accent-500 px-1.5 py-0.5 text-xs font-semibold text-white">{item.badge}</span>
+              <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-500 px-1.5 text-xs font-semibold leading-none text-white">{item.badge}</span>
             )}
           </NavLink>
         ))}
@@ -94,10 +106,54 @@ export function AppLayout({ navItems, userName, userRole, userPhoto, onLogout, s
           </button>
           <Logo />
         </header>
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main className="mx-auto max-w-7xl px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">
           <Outlet />
         </main>
       </div>
+
+      {/* Bottom navigation (mobile) */}
+      {!hideMobileNav && (
+        <nav
+          className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden"
+          aria-label="Navegação principal"
+        >
+          <div className="grid grid-cols-5">
+            {mobileItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  cn(
+                    'flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition',
+                    isActive ? 'text-brand-700' : 'text-slate-500 hover:text-slate-700',
+                  )
+                }
+              >
+                <span className="relative">
+                  {item.icon}
+                  {!!item.badge && (
+                    <span className="absolute -right-2 -top-1.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent-500 px-1 text-[10px] font-semibold leading-none text-white">
+                      {item.badge}
+                    </span>
+                  )}
+                </span>
+                <span className="max-w-full truncate px-1">{item.mobileLabel ?? item.label}</span>
+              </NavLink>
+            ))}
+            <button
+              onClick={() => setOpen(true)}
+              className={cn(
+                'flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition',
+                mobileAtivo ? 'text-slate-500 hover:text-slate-700' : 'text-brand-700',
+              )}
+            >
+              <Menu size={18} />
+              <span>Mais</span>
+            </button>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }

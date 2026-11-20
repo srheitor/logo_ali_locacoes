@@ -18,6 +18,9 @@ export function PresentationPage() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
           <Logo light />
           <div className="flex items-center gap-3">
+            <Link to="/demo" className="hidden rounded-full px-4 py-2 text-sm font-semibold text-teal-100 transition hover:bg-white/10 sm:inline-flex">
+              Demonstração
+            </Link>
             <Link to="/login" className="rounded-full px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10 hover:text-white">
               Entrar
             </Link>

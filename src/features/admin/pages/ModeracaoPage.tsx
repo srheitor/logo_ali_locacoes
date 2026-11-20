@@ -63,7 +63,7 @@ export function ModeracaoPage() {
       ) : lista.length === 0 ? (
         <EmptyState icon={<ClipboardCheck size={24} />} title="Tudo em dia!" description="Nenhum anúncio aguardando moderação." />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {lista.map((a) => {
             const fotos = fotosDoAnuncio(db, a.id);
             return (

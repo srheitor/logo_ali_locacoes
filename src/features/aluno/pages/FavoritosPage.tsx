@@ -28,7 +28,7 @@ export function FavoritosPage() {
           action={<Link to="/aluno"><Button>Buscar imóveis</Button></Link>}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {favoritos.map((a) => (
             <AnuncioCard
               key={a.id}
@@ -39,6 +39,7 @@ export function FavoritosPage() {
               avaliacao={mediaAvaliacoes(db, a.id)}
               favorito
               onToggleFavorito={() => void acoes.alternarFavorito(user.id, a.id)}
+              totalFotos={db.fotos.filter((f) => f.anuncio_id === a.id).length}
               footer={a.status !== 'DISPONIVEL' && <div className="pt-1"><AnuncioStatusBadge status={a.status} /></div>}
             />
           ))}

@@ -49,14 +49,14 @@ export function PainelAdminPage() {
     <>
       <PageHeader title={`Olá, ${user.nome.split(' ')[0]}!`} subtitle="Visão geral da plataforma Logo Alí." />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Usuários" value={db.usuarios.length} hint={`${contagem('ESTUDANTE')} alunos · ${contagem('PROPRIETARIO')} proprietários`} icon={<Users size={22} />} />
         <StatCard label="Anúncios disponíveis" value={db.anuncios.filter((a) => a.status === 'DISPONIVEL' && a.aprovado_moderacao).length} hint={`${db.anuncios.length} cadastrados`} icon={<Building2 size={22} />} tone="sky" />
         <Link to="/admin/moderacao"><StatCard label="Aguardando moderação" value={pendentesModeracao} icon={<ClipboardCheck size={22} />} tone="violet" /></Link>
         <Link to="/admin/verificacoes"><StatCard label="Verificações pendentes" value={verificacoesPendentes} icon={<ShieldQuestion size={22} />} tone="amber" /></Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader title="Anúncios mais visualizados" subtitle="Total de visualizações por anúncio" />
           <CardBody>

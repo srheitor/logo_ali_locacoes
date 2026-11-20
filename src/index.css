@@ -2,8 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   @apply bg-slate-50 font-sans text-slate-900 antialiased;
+  overflow-x: hidden;
+}
+
+/* ---------- Utilidades mobile ---------- */
+.safe-bottom {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mantém um botão flutuante acima da barra de navegação inferior. */
+.floating-above-nav {
+  bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* ---------- Marcadores do mapa (Leaflet) ---------- */

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import L from 'leaflet';
-import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
+import { AttributionControl, MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Anuncio, Campus } from '@/shared/types/domain';
 import { formatCurrency } from '@/shared/utils';
@@ -21,6 +21,23 @@ const campusIcon = L.divIcon({
   iconSize: [36, 36],
   iconAnchor: [18, 18],
 });
+
+/** Recalcula o tamanho do mapa quando o contêiner é criado ou redimensionado (evita tiles cortados). */
+function MapResizeHandler() {
+  const map = useMap();
+  useEffect(() => {
+    const container = map.getContainer();
+    const invalidate = () => map.invalidateSize();
+    const raf = requestAnimationFrame(invalidate);
+    const observer = new ResizeObserver(invalidate);
+    observer.observe(container);
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+    };
+  }, [map]);
+  return null;
+}
 
 function FitBounds({ points }: { points: Array<[number, number]> }) {
   const map = useMap();
@@ -58,11 +75,20 @@ export function AnunciosMap({ anuncios, campus, campusLabel, selectedId, onSelec
   }, [anuncios, campus, rota, selectedId]);
 
   return (
-    <MapContainer center={[-21.7642, -43.3496]} zoom={14} scrollWheelZoom className={className ?? 'h-full w-full'}>
+    <MapContainer
+      center={[-21.7642, -43.3496]}
+      zoom={14}
+      scrollWheelZoom
+      attributionControl={false}
+      className={className ?? 'h-full w-full'}
+    >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      {/* prefix={false} remove a bandeira/logotipo do Leaflet, mantendo a atribuição do OpenStreetMap */}
+      <AttributionControl position="bottomright" prefix={false} />
+      <MapResizeHandler />
       <FitBounds points={points} />
       {rota && (
         <>

@@ -52,17 +52,19 @@ export function BarList({ items, format = String, ariaLabel }: BarListProps) {
           </div>
         ))}
       </div>
-      <table className="sr-only">
-        <caption>{ariaLabel}</caption>
-        <tbody>
-          {items.map((i) => (
-            <tr key={i.id}>
-              <th scope="row">{i.label}</th>
-              <td>{format(i.value)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="sr-only">
+        <table>
+          <caption>{ariaLabel}</caption>
+          <tbody>
+            {items.map((i) => (
+              <tr key={i.id}>
+                <th scope="row">{i.label}</th>
+                <td>{format(i.value)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   );
 }

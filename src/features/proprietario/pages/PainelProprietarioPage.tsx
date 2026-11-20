@@ -29,15 +29,15 @@ export function PainelProprietarioPage() {
         actions={<Link to="/proprietario/anuncios/novo"><Button icon={<Plus size={16} />}>Novo anúncio</Button></Link>}
       />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Anúncios ativos" value={`${ativos.length}/${meus.length}`} icon={<Building2 size={22} />} />
         <StatCard label="Visualizações" value={visualizacoes} icon={<Eye size={22} />} tone="sky" />
         <StatCard label="Visitas aguardando resposta" value={pendentes} icon={<CalendarClock size={22} />} tone="amber" />
         <StatCard label="Mensagens não lidas" value={totalNaoLidas(db, user.id)} icon={<MessageCircle size={22} />} tone="violet" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card className="min-w-0">
           <CardHeader title="Próximas visitas" action={<Link to="/proprietario/visitas" className="text-sm font-medium text-brand-700 hover:underline">Ver todas</Link>} />
           <CardBody className="space-y-3">
             {proximas.length === 0 && <p className="text-sm text-slate-400">Nenhuma visita agendada.</p>}
@@ -53,7 +53,7 @@ export function PainelProprietarioPage() {
           </CardBody>
         </Card>
 
-        <Card>
+        <Card className="min-w-0">
           <CardHeader title="Desempenho dos anúncios" subtitle="Mais visualizados" />
           <CardBody className="space-y-3">
             {ranking.map((a) => {

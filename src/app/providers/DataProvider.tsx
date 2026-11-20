@@ -40,7 +40,7 @@ export function useData() {
 // Modo mock — "banco" em memória, salvo no localStorage para sobreviver a um F5.
 // ======================================================================
 // Incrementar a versão sempre que o formato dos dados mudar (descarta o que estiver salvo no navegador).
-const STORAGE_KEY = 'logoali:db:v3';
+const STORAGE_KEY = 'logoali:db:v5';
 
 function loadInitial(): Database {
   try {

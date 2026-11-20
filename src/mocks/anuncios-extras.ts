@@ -51,6 +51,8 @@ const BAIRROS: Bairro[] = [
   { nome: 'Teixeiras', cep: '36033', latitude: -21.755, longitude: -43.365, fatorPreco: 0.96, perfil: 'com fácil acesso ao Centro e à UFJF' },
   { nome: 'Morro da Glória', cep: '36015', latitude: -21.77, longitude: -43.355, fatorPreco: 0.94, perfil: 'a poucos minutos do Campus Sede' },
   { nome: 'Eldorado', cep: '36033', latitude: -21.785, longitude: -43.35, fatorPreco: 0.9, perfil: 'em bairro residencial com transporte frequente' },
+  { nome: 'Salvaterra', cep: '36033', latitude: -21.8167, longitude: -43.3797, fatorPreco: 0.95, perfil: 'próximo à FCMS/JF e ao campus da SUPREMA' },
+  { nome: 'Distrito Industrial', cep: '36090', latitude: -21.6855, longitude: -43.4347, fatorPreco: 0.85, perfil: 'na região industrial, com acesso pelas avenidas da zona norte' },
 ];
 
 const RUAS = [
