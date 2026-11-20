@@ -50,7 +50,7 @@ async function garantirParticipante(usuarioId: Id, conversaId: Id) {
     'Conversa não encontrada.',
   );
   if (conversa.estudante_id !== usuarioId && conversa.proprietario_id !== usuarioId) {
-    throw forbidden('Você não participa desta conversa (RN04).');
+    throw forbidden('Você não participa desta conversa.');
   }
   return conversa;
 }

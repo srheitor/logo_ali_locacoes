@@ -34,7 +34,7 @@ export function MeusAnunciosPage() {
     <>
       <PageHeader
         title="Meus anúncios"
-        subtitle="Mantenha o status dos seus imóveis atualizado (RN08)."
+        subtitle="Mantenha o status dos seus imóveis atualizado."
         actions={<Link to="/proprietario/anuncios/novo"><Button icon={<Plus size={16} />}>Novo anúncio</Button></Link>}
       />
       <Tabs

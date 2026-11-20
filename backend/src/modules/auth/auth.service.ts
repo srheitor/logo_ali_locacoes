@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { conflict, forbidden, must, notFound, unauthorized } from '../../lib/errors.js';
+import { conflict, forbidden, must, unauthorized } from '../../lib/errors.js';
 import { agora, novoId, supabaseAdmin, T } from '../../lib/supabase.js';
 import { emitirSessao, verificarToken } from '../../lib/tokens.js';
 import type { Id, TipoUsuario } from '../../types/domain.js';
@@ -26,15 +26,10 @@ export async function cadastrar(input: CadastroInput) {
   );
   if (existente) throw conflict('Já existe um usuário com este e-mail.');
 
-  if (input.tipo === 'ESTUDANTE') {
-    const campus = must<{ id: Id } | null>(
-      await supabaseAdmin.from(T.campus).select('id').eq('id', input.campus_id).maybeSingle(),
-    );
-    if (!campus) throw notFound('Campus não encontrado.');
-  }
-
   const id = novoId();
   const criadoEm = agora();
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const campusId = input.tipo === 'ESTUDANTE' && input.campus_id && uuid.test(input.campus_id) ? input.campus_id : null;
 
   must(
     await supabaseAdmin.from(T.usuario).insert({
@@ -55,14 +50,14 @@ export async function cadastrar(input: CadastroInput) {
     input.tipo === 'ESTUDANTE'
       ? await supabaseAdmin.from(T.estudante).insert({
           usuario_id: id,
-          campus_id: input.campus_id,
+          campus_id: campusId,
           matricula: input.matricula ?? null,
           verificado: false,
           criado_em: criadoEm,
         })
       : await supabaseAdmin.from(T.proprietario).insert({
           usuario_id: id,
-          documento: input.documento,
+          documento: input.documento ?? null,
           criado_em: criadoEm,
         });
 

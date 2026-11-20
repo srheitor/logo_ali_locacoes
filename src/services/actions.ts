@@ -188,9 +188,9 @@ export function salvarAnuncio(
   input: AnuncioInput,
   anuncioId?: Id,
 ): ActionResult<Id> {
-  if (input.valor_aluguel <= 0) return fail('O valor do aluguel deve ser maior que zero (RN07).');
-  if (input.quantidade_quartos < 0) return fail('A quantidade de quartos não pode ser negativa (RN07).');
-  if (input.fotos.length < MIN_FOTOS) return fail(`O anúncio precisa de no mínimo ${MIN_FOTOS} fotos (RN06).`);
+  if (input.valor_aluguel <= 0) return fail('O valor do aluguel deve ser maior que zero.');
+  if (input.quantidade_quartos < 0) return fail('A quantidade de quartos não pode ser negativa.');
+  if (input.fotos.length < MIN_FOTOS) return fail(`O anúncio precisa de no mínimo ${MIN_FOTOS} fotos.`);
 
   const next = clone(db);
   const agora = nowIso();
@@ -200,7 +200,7 @@ export function salvarAnuncio(
   if (id) {
     const anuncio = next.anuncios.find((a) => a.id === id);
     if (!anuncio) return fail('Anúncio não encontrado.');
-    if (anuncio.proprietario_id !== proprietarioId) return fail('Você não é o proprietário deste anúncio (RN05).');
+    if (anuncio.proprietario_id !== proprietarioId) return fail('Você não é o proprietário deste anúncio.');
     Object.assign(anuncio, campos, { atualizado_em: agora });
   } else {
     id = newId();
@@ -348,13 +348,13 @@ export function solicitarVisita(
 ): ActionResult<Id> {
   const anuncio = db.anuncios.find((a) => a.id === anuncioId);
   if (!anuncio) return fail('Anúncio não encontrado.');
-  if (anuncio.status !== 'DISPONIVEL') return fail('Só é possível agendar visita em anúncios disponíveis (RN02).');
-  if (dataHora <= new Date()) return fail('A data da visita deve ser futura (RN02.4).');
-  if (dataHora > new Date(anuncio.data_expiracao)) return fail('A data deve estar dentro da vigência do anúncio (RN02.4).');
+  if (anuncio.status !== 'DISPONIVEL') return fail('Só é possível agendar visita em anúncios disponíveis.');
+  if (dataHora <= new Date()) return fail('A data da visita deve ser futura.');
+  if (dataHora > new Date(anuncio.data_expiracao)) return fail('A data deve estar dentro da vigência do anúncio.');
   const duplicada = db.visitas.some(
     (v) => v.estudante_id === estudanteId && v.anuncio_id === anuncioId && VISITA_ATIVA.includes(v.status),
   );
-  if (duplicada) return fail('Você já possui uma visita ativa para este anúncio (RN02.5).');
+  if (duplicada) return fail('Você já possui uma visita ativa para este anúncio.');
 
   const next = clone(db);
   const id = newId();
@@ -409,7 +409,7 @@ export function enviarMensagem(db: Database, conversaId: Id, remetenteId: Id, co
   const conversa = db.conversas.find((c) => c.id === conversaId);
   if (!conversa) return fail('Conversa não encontrada.');
   if (remetenteId !== conversa.estudante_id && remetenteId !== conversa.proprietario_id) {
-    return fail('Remetente não participa desta conversa (RN04).');
+    return fail('Remetente não participa desta conversa.');
   }
   const next = clone(db);
   next.mensagens.push({ id: newId(), conversa_id: conversaId, remetente_id: remetenteId, conteudo: texto, enviado_em: nowIso() });
@@ -435,7 +435,7 @@ export function avaliarAnuncio(db: Database, estudanteId: Id, anuncioId: Id, not
   const teveExperiencia = db.visitas.some(
     (v) => v.estudante_id === estudanteId && v.anuncio_id === anuncioId && v.status === 'REALIZADA',
   );
-  if (!teveExperiencia) return fail('Só é possível avaliar imóveis que você já visitou (RN09).');
+  if (!teveExperiencia) return fail('Só é possível avaliar imóveis que você já visitou.');
   const next = clone(db);
   const existente = next.avaliacoes.find((a) => a.estudante_id === estudanteId && a.anuncio_id === anuncioId);
   if (existente) {

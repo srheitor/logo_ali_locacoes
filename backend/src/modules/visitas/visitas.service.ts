@@ -66,11 +66,11 @@ export async function solicitar(estudanteId: Id, anuncioId: Id, dataHora: Date, 
   );
   if (!anuncio) throw notFound('Anúncio não encontrado.');
   if (anuncio.status !== 'DISPONIVEL' || anuncio.aprovado_moderacao !== true) {
-    throw businessRule('Só é possível agendar visita em anúncios disponíveis (RN02).');
+    throw businessRule('Só é possível agendar visita em anúncios disponíveis.');
   }
-  if (dataHora <= new Date()) throw businessRule('A data da visita deve ser futura (RN02.4).');
+  if (dataHora <= new Date()) throw businessRule('A data da visita deve ser futura.');
   if (anuncio.data_expiracao && dataHora > new Date(anuncio.data_expiracao)) {
-    throw businessRule('A data deve estar dentro da vigência do anúncio (RN02.4).');
+    throw businessRule('A data deve estar dentro da vigência do anúncio.');
   }
 
   const { count, error } = await supabaseAdmin
@@ -80,7 +80,7 @@ export async function solicitar(estudanteId: Id, anuncioId: Id, dataHora: Date, 
     .eq('anuncio_id', anuncioId)
     .in('status', VISITA_ATIVA);
   if (error) throw error;
-  if (count) throw conflict('Você já possui uma visita ativa para este anúncio (RN02.5).');
+  if (count) throw conflict('Você já possui uma visita ativa para este anúncio.');
 
   const id = novoId();
   const agoraIso = agora();

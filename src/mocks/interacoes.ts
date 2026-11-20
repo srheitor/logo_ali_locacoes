@@ -72,7 +72,7 @@ export const moderacoes: ModeracaoAnuncio[] = [
   { id: 'mod-2', anuncio_id: 'an-02', admin_id: 'usr-admin', acao: 'APROVADO', realizado_em: daysFromNow(-10) },
   { id: 'mod-3', anuncio_id: 'an-03', admin_id: 'usr-admin', acao: 'APROVADO', realizado_em: daysFromNow(-10) },
   { id: 'mod-4', anuncio_id: 'an-04', admin_id: 'usr-admin', acao: 'APROVADO', realizado_em: daysFromNow(-10) },
-  { id: 'mod-5', anuncio_id: 'an-06', admin_id: 'usr-admin', acao: 'REJEITADO', justificativa: 'Menos de 3 fotos enviadas (RN06).', realizado_em: daysFromNow(-12) },
+  { id: 'mod-5', anuncio_id: 'an-06', admin_id: 'usr-admin', acao: 'REJEITADO', justificativa: 'Menos de 3 fotos enviadas.', realizado_em: daysFromNow(-12) },
   { id: 'mod-6', anuncio_id: 'an-06', admin_id: 'usr-admin', acao: 'APROVADO', justificativa: 'Fotos corrigidas.', realizado_em: daysFromNow(-10) },
 ];
 

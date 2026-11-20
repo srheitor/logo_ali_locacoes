@@ -30,9 +30,9 @@ export type BuscaFiltro = z.infer<typeof buscaQuery>;
 export const anuncioSchema = z.object({
   titulo: z.string().trim().min(5).max(120),
   descricao: z.string().trim().min(10).max(5000),
-  valor_aluguel: z.number().positive('O valor do aluguel deve ser maior que zero (RN07).'),
+  valor_aluguel: z.number().positive('O valor do aluguel deve ser maior que zero.'),
   tipo_imovel: z.enum(TIPOS_IMOVEL),
-  quantidade_quartos: z.number().int().nonnegative('A quantidade de quartos não pode ser negativa (RN07).'),
+  quantidade_quartos: z.number().int().nonnegative('A quantidade de quartos não pode ser negativa.'),
   mobiliado: z.boolean().default(false),
   disponibilidade_imediata: z.boolean().default(false),
   endereco: z.string().trim().min(3).max(300),
@@ -42,7 +42,7 @@ export const anuncioSchema = z.object({
   cep: optionalText(9),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
-  fotos: z.array(z.string().trim().min(1)).min(3, 'O anúncio precisa de no mínimo 3 fotos (RN06).').max(20),
+  fotos: z.array(z.string().trim().min(1)).min(3, 'O anúncio precisa de no mínimo 3 fotos.').max(20),
   comodidades: z.array(z.uuid()).default([]),
   regras: z.array(z.string().trim().max(200)).max(30).default([]),
 });

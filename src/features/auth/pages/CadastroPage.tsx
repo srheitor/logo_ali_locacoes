@@ -3,9 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Building2, GraduationCap } from 'lucide-react';
 import { useData } from '@/app/providers/DataProvider';
 import {
-  CpfCnpjInput,
-  CpfInput,
-  DateOfBirthInput,
   EmailInput,
   PasswordInput,
   PhoneInput,
@@ -17,11 +14,8 @@ import { Logo } from '@/shared/components/layout/Logo';
 import { Button, Card } from '@/shared/components/ui';
 import { useForm } from '@/shared/hooks/useForm';
 import {
-  birthDateValidator,
   brDateToIso,
   cn,
-  cpfCnpjValidator,
-  cpfValidator,
   emailValidator,
   phoneValidator,
   required,
@@ -54,20 +48,16 @@ export function CadastroPage() {
 
   const minSenha: Validator = (v) => (v.length >= 6 ? undefined : 'Mínimo de 6 caracteres');
 
-  // As regras mudam conforme o perfil escolhido.
+  // Apenas nome, e-mail, telefone e senha são validados. Os demais campos aceitam qualquer valor.
   const rules = useMemo(
     () => ({
       nome: [required()],
       email: [required(), emailValidator],
       telefone: [required(), phoneValidator],
-      cpf: [required(), cpfValidator],
-      nascimento: [required(), birthDateValidator(perfil === 'ESTUDANTE' ? 16 : 18)],
       senha: [required(), minSenha],
-      ...(perfil === 'ESTUDANTE'
-        ? { instituicao: [required('Selecione a instituição')], campus: [required('Selecione o campus')], matricula: [required()] }
-        : { documento: [required(), cpfCnpjValidator] }),
+      confirmar: [required()],
     }),
-    [perfil],
+    [],
   );
 
   const form = useForm(initial, rules);
@@ -112,7 +102,7 @@ export function CadastroPage() {
         </Link>
         <Card className="p-6 sm:p-8">
           <h1 className="text-2xl font-bold text-slate-900">Criar conta</h1>
-          <p className="mt-1 text-sm text-slate-500">Escolha o tipo de perfil (RF01).</p>
+          <p className="mt-1 text-sm text-slate-500">Escolha o tipo de perfil.</p>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
             {(
@@ -143,14 +133,13 @@ export function CadastroPage() {
             <TextInput label="Nome completo" required className="sm:col-span-2" {...form.field('nome')} />
             <EmailInput required {...form.field('email')} />
             <PhoneInput required {...form.field('telefone')} />
-            <CpfInput required {...form.field('cpf')} />
-            <DateOfBirthInput required {...form.field('nascimento')} />
+            <TextInput label="CPF" {...form.field('cpf')} />
+            <TextInput label="Data de nascimento" {...form.field('nascimento')} />
 
             {perfil === 'ESTUDANTE' ? (
               <>
                 <SelectInput
                   label="Instituição de ensino"
-                  required
                   placeholder="Selecione..."
                   options={db.instituicoes.map((i) => ({ value: i.id, label: `${i.sigla} – ${i.nome}` }))}
                   {...form.field('instituicao')}
@@ -161,18 +150,16 @@ export function CadastroPage() {
                 />
                 <SelectInput
                   label="Campus"
-                  required
                   placeholder={values.instituicao ? 'Selecione...' : 'Escolha a instituição'}
                   disabled={!values.instituicao}
                   options={campusOptions}
                   {...form.field('campus')}
                 />
-                <TextInput label="Matrícula" required className="sm:col-span-2" {...form.field('matricula')} />
+                <TextInput label="Matrícula" className="sm:col-span-2" {...form.field('matricula')} />
               </>
             ) : (
-              <CpfCnpjInput
+              <TextInput
                 label="Documento do locador (CPF ou CNPJ)"
-                required
                 className="sm:col-span-2"
                 hint="Pessoa física ou jurídica (imobiliária, pensão)."
                 {...form.field('documento')}

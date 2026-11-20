@@ -42,7 +42,7 @@ export function PainelAdminPage() {
 
   const rodarRotina = async () => {
     const r = await acoes.executarRotinaExpiracao();
-    if (r.ok) toast.success(`Rotina RN03 executada: ${r.data.expirados} vencido(s), ${r.data.republicados} republicado(s).`);
+    if (r.ok) toast.success(`Rotina executada: ${r.data.expirados} vencido(s), ${r.data.republicados} republicado(s).`);
   };
 
   return (
@@ -88,7 +88,7 @@ export function PainelAdminPage() {
             </CardBody>
           </Card>
           <Card>
-            <CardHeader title="Rotina de expiração (RN03)" subtitle="Em produção roda automaticamente (ex.: pg_cron). Aqui pode ser disparada manualmente." />
+            <CardHeader title="Rotina de expiração" subtitle="Em produção roda automaticamente (ex.: pg_cron). Aqui pode ser disparada manualmente." />
             <CardBody className="flex flex-wrap items-center justify-between gap-3">
               <span className="inline-flex items-center gap-2 text-sm text-slate-600">
                 <Clock size={16} className="text-amber-600" /> {vencidos} anúncio(s) vencido(s) aguardando a rotina

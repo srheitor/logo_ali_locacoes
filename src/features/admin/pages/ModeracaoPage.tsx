@@ -81,7 +81,7 @@ export function ModeracaoPage() {
                   </p>
                   <p className="line-clamp-2 text-sm text-slate-500">{a.descricao}</p>
                   <p className="text-xs text-slate-400">Proprietário: {getUsuario(db, a.proprietario_id)?.nome}</p>
-                  {fotos.length < 3 && <Badge tone="red">Menos de 3 fotos (RN06)</Badge>}
+                  {fotos.length < 3 && <Badge tone="red">Menos de 3 fotos</Badge>}
                   <div className="flex flex-wrap gap-2 pt-2">
                     {!a.aprovado_moderacao && (
                       <>

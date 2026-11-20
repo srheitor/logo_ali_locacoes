@@ -7,7 +7,7 @@ const base = {
   nome: z.string().trim().min(2).max(120),
   email,
   senha,
-  telefone: optionalText(100),
+  telefone: z.string().trim().min(1, 'Informe o telefone.').max(100),
 };
 
 /** RF01 — cadastro com perfil (estudante ou proprietário). Admins são criados pelo seed. */
@@ -15,13 +15,13 @@ export const cadastroSchema = z.discriminatedUnion('tipo', [
   z.object({
     tipo: z.literal('ESTUDANTE'),
     ...base,
-    campus_id: z.uuid('Selecione o campus.'), // RF02
+    campus_id: optionalText(100),
     matricula: optionalText(40),
   }),
   z.object({
     tipo: z.literal('PROPRIETARIO'),
     ...base,
-    documento: z.string().trim().min(11, 'Informe o CPF ou CNPJ.').max(18),
+    documento: optionalText(100),
   }),
 ]);
 export type CadastroInput = z.infer<typeof cadastroSchema>;

@@ -231,7 +231,7 @@ async function garantirAcesso(user: UsuarioAutenticado, anuncioId: Id, { permiti
   );
   const admin = permitirAdmin && user.tipo_usuario === 'ADMIN';
   if (anuncio.proprietario_id !== user.id && !admin) {
-    throw forbidden('Você não é o proprietário deste anúncio (RN05).');
+    throw forbidden('Você não é o proprietário deste anúncio.');
   }
   return anuncio;
 }

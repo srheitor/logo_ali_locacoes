@@ -24,7 +24,7 @@ export async function avaliar(estudanteId: Id, anuncioId: Id, nota: number, come
     anuncio_id: anuncioId,
     status: 'REALIZADA',
   });
-  if (!visitasRealizadas) throw businessRule('Só é possível avaliar imóveis que você já visitou (RN09).');
+  if (!visitasRealizadas) throw businessRule('Só é possível avaliar imóveis que você já visitou.');
 
   const existente = must<{ id: Id } | null>(
     await supabaseAdmin

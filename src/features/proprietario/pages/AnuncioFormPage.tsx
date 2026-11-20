@@ -112,7 +112,7 @@ export function AnuncioFormPage() {
   const salvar = async (e: FormEvent) => {
     e.preventDefault();
     const valid = form.validateAll();
-    if (fotos.length < 3) setFotosError('Envie no mínimo 3 fotos (RN06).');
+    if (fotos.length < 3) setFotosError('Envie no mínimo 3 fotos.');
     if (!valid || fotos.length < 3) return toast.error('Verifique os campos destacados.');
 
     const v = form.values;
