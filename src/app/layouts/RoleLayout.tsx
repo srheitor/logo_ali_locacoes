@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Search,
   ShieldQuestion,
-  Sparkles,
   UserRound,
   Users,
 } from 'lucide-react';
@@ -34,7 +33,6 @@ function navFor(role: TipoUsuario, db: Database, user: Usuario): NavItem[] {
         { to: '/aluno/mensagens', label: 'Mensagens', icon: <MessageCircle size={18} />, badge: naoLidas, mobile: true },
         { to: '/aluno/verificacao', label: 'Verificação', icon: <BadgeCheck size={18} /> },
         { to: '/aluno/perfil', label: 'Meu perfil', icon: <UserRound size={18} /> },
-        { to: '/demo', label: 'Modo apresentação', icon: <Sparkles size={18} /> },
       ];
     case 'PROPRIETARIO':
       return [
@@ -51,7 +49,6 @@ function navFor(role: TipoUsuario, db: Database, user: Usuario): NavItem[] {
         },
         { to: '/proprietario/mensagens', label: 'Mensagens', icon: <MessageCircle size={18} />, badge: naoLidas, mobile: true },
         { to: '/proprietario/perfil', label: 'Meu perfil', icon: <UserRound size={18} /> },
-        { to: '/demo', label: 'Modo apresentação', icon: <Sparkles size={18} /> },
       ];
     case 'ADMIN':
       return [
@@ -60,7 +57,6 @@ function navFor(role: TipoUsuario, db: Database, user: Usuario): NavItem[] {
         { to: '/admin/verificacoes', label: 'Verificações', icon: <ShieldQuestion size={18} />, badge: db.vinculos.filter((v) => v.status === 'PENDENTE').length, mobile: true, mobileLabel: 'Vínculos' },
         { to: '/admin/usuarios', label: 'Usuários', icon: <Users size={18} />, mobile: true },
         { to: '/admin/perfil', label: 'Meu perfil', icon: <UserRound size={18} /> },
-        { to: '/demo', label: 'Modo apresentação', icon: <Sparkles size={18} /> },
       ];
   }
 }
