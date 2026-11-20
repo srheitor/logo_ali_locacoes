@@ -5,7 +5,7 @@ import { ultimaVerificacao } from '@/services/queries';
 import { EmailInput, FormField } from '@/shared/components/form';
 import { useToast } from '@/shared/components/feedback/Toast';
 import { Button, Card, CardBody, CardHeader, PageHeader, VerificacaoStatusBadge } from '@/shared/components/ui';
-import { formatDateTime, isInstitutionalEmail } from '@/shared/utils';
+import { formatDateTime } from '@/shared/utils';
 import { useEstudanteAtual } from '../useEstudanteAtual';
 
 /** RF09 / RN01 — verificação do vínculo estudantil. */
@@ -22,7 +22,6 @@ export function VerificacaoPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (email && !isInstitutionalEmail(email)) return setEmailError('Use seu e-mail institucional (ex.: nome@estudante.ufjf.br)');
     const r = await acoes.enviarVerificacao(user.id, {
       email_institucional: email || undefined,
       documento_url: arquivo?.name,

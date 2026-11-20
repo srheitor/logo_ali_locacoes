@@ -11,7 +11,7 @@ export const verificacoesRouter = Router();
 verificacoesRouter.use(authenticate());
 
 const envioSchema = z.object({
-  email_institucional: z.preprocess((v) => (v === '' ? undefined : v), z.email().trim().toLowerCase().optional()),
+  email_institucional: optionalText(200),
   /** Caminho devolvido por `POST /uploads` com bucket "documentos". */
   documento_path: optionalText(500),
 });
