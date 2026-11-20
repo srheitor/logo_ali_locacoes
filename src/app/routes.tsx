@@ -17,10 +17,11 @@ import { AnuncioFormPage } from '@/features/proprietario/pages/AnuncioFormPage';
 import { MeusAnunciosPage } from '@/features/proprietario/pages/MeusAnunciosPage';
 import { PainelProprietarioPage } from '@/features/proprietario/pages/PainelProprietarioPage';
 import { VisitasRecebidasPage } from '@/features/proprietario/pages/VisitasRecebidasPage';
+import { PresentationPage } from '@/features/public/pages/PresentationPage';
 import { RoleLayout } from './layouts/RoleLayout';
 
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/login" replace /> },
+  { path: '/', element: <PresentationPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/cadastro', element: <CadastroPage /> },
 
