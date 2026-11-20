@@ -1,21 +1,22 @@
 /**
- * Fotos reais (domínio público/CC0 — ver fotos-demo/CREDITOS.md) para os anúncios de demonstração.
+ * Fotos reais (domínio público/CC0 — ver public/imoveis/fotos/CREDITOS.md) para os anúncios de demonstração.
  *
- * Cada subpasta de `fotos-demo/` tem o id do anúncio nos mocks (ex.: "an-02") e as fotos
- * em ordem de exibição (a primeira é a capa). O script:
- *   1) cria os buckets do Storage, se ainda não existirem;
- *   2) envia as fotos para o bucket público "anuncios" (pasta demo/<id>/);
- *   3) substitui as fotos do anúncio em FOTO_ANUNCIO pelas URLs públicas.
+ * O pool local fica em `public/imoveis/fotos/`: 20 conjuntos com 5 fotos cada.
+ * O seed associa cada anúncio a um conjunto conforme o tipo de imóvel, envia cada conjunto
+ * uma única vez ao bucket público "anuncios" (pasta demo/fotos/<conjunto>/) e substitui
+ * as fotos do anúncio em FOTO_ANUNCIO pelas URLs públicas.
  *
  * Uso: npm run seed:fotos   (o `npm run seed` também chama este passo)
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createSeed } from '@/mocks/index.ts';
+import { conjuntoDoAnuncio, FOTOS_POR_CONJUNTO } from '@/mocks/fotos.ts';
 import { novoId, supabaseAdmin, T } from '../src/lib/supabase.ts';
 import { uuidDoMock } from './ids.ts';
 
-const PASTA = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fotos-demo');
+const PASTA = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public/imoveis/fotos');
 const BUCKET = 'anuncios';
 export const PREFIXO_STORAGE = 'demo';
 
@@ -38,38 +39,51 @@ export async function garantirBuckets() {
   }
 }
 
+/** Envia um conjunto de fotos ao Storage (idempotente) e devolve as URLs públicas em ordem. */
+async function enviarConjunto(conjunto: string) {
+  const pasta = path.join(PASTA, conjunto);
+  if (!fs.existsSync(pasta)) throw new Error(`Conjunto de fotos não encontrado: ${pasta}`);
+
+  const urls: string[] = [];
+  for (let ordem = 1; ordem <= FOTOS_POR_CONJUNTO; ordem++) {
+    const arquivo = `${String(ordem).padStart(2, '0')}.webp`;
+    const origem = path.join(pasta, arquivo);
+    if (!fs.existsSync(origem)) throw new Error(`Foto ausente: ${conjunto}/${arquivo}`);
+    const destino = `${PREFIXO_STORAGE}/fotos/${conjunto}/${arquivo}`;
+    const { error } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .upload(destino, fs.readFileSync(origem), { contentType: 'image/webp', upsert: true });
+    if (error) throw new Error(`Falha ao enviar ${destino}: ${error.message}`);
+    urls.push(supabaseAdmin.storage.from(BUCKET).getPublicUrl(destino).data.publicUrl);
+  }
+  return urls;
+}
+
 export async function aplicarFotosDemo() {
   await garantirBuckets();
 
-  const anuncios = fs
-    .readdirSync(PASTA, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
+  const db = createSeed();
+  const porConjunto = new Map<string, string[]>();
+  for (const anuncio of db.anuncios) {
+    const conjunto = conjuntoDoAnuncio(anuncio.id, anuncio.tipo_imovel);
+    if (!porConjunto.has(conjunto)) porConjunto.set(conjunto, []);
+  }
 
-  for (const mockId of anuncios) {
-    const anuncioId = uuidDoMock(mockId);
-    const { data: anuncio, error: errAnuncio } = await supabaseAdmin
-      .from(T.anuncio)
-      .select('id, titulo')
-      .eq('id', anuncioId)
-      .maybeSingle();
-    if (errAnuncio) throw errAnuncio;
-    if (!anuncio) {
-      console.log(`  • ${mockId}: anúncio não está no banco (rode npm run seed) — ignorado`);
-      continue;
-    }
+  console.log(`  ↑ enviando ${porConjunto.size} conjuntos de fotos ao Storage…`);
+  for (const conjunto of porConjunto.keys()) {
+    porConjunto.set(conjunto, await enviarConjunto(conjunto));
+  }
 
-    const arquivos = fs.readdirSync(path.join(PASTA, mockId)).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort();
-    const urls: string[] = [];
-    for (const arquivo of arquivos) {
-      const destino = `${PREFIXO_STORAGE}/${mockId}/${arquivo}`;
-      const tipo = arquivo.endsWith('.png') ? 'image/png' : arquivo.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
-      const { error } = await supabaseAdmin.storage
-        .from(BUCKET)
-        .upload(destino, fs.readFileSync(path.join(PASTA, mockId, arquivo)), { contentType: tipo, upsert: true });
-      if (error) throw new Error(`Falha ao enviar ${destino}: ${error.message}`);
-      urls.push(supabaseAdmin.storage.from(BUCKET).getPublicUrl(destino).data.publicUrl);
-    }
+  const ids = db.anuncios.map((a) => uuidDoMock(a.id));
+  const { data: existentes, error } = await supabaseAdmin.from(T.anuncio).select('id, titulo').in('id', ids);
+  if (error) throw error;
+  const encontrados = new Map((existentes ?? []).map((a) => [a.id as string, a.titulo as string]));
+
+  for (const anuncio of db.anuncios) {
+    const anuncioId = uuidDoMock(anuncio.id);
+    const titulo = encontrados.get(anuncioId);
+    if (!titulo) continue; // anúncio não está no banco (rode npm run seed antes)
+    const urls = porConjunto.get(conjuntoDoAnuncio(anuncio.id, anuncio.tipo_imovel))!;
 
     const { error: errDel } = await supabaseAdmin.from(T.foto).delete().eq('anuncio_id', anuncioId);
     if (errDel) throw errDel;
@@ -77,26 +91,37 @@ export async function aplicarFotosDemo() {
       .from(T.foto)
       .insert(urls.map((url, i) => ({ id: novoId(), anuncio_id: anuncioId, url, ordem: i + 1 })));
     if (errIns) throw errIns;
-    console.log(`  ✔ ${anuncio.titulo}: ${urls.length} fotos`);
+    console.log(`  ✔ ${titulo}: ${urls.length} fotos`);
   }
+}
+
+/** Remove recursivamente os arquivos de demonstração do Storage. */
+async function removerRecursivo(prefixo: string): Promise<number> {
+  const { data, error } = await supabaseAdmin.storage.from(BUCKET).list(prefixo);
+  if (error) throw error;
+  let total = 0;
+  const arquivos: string[] = [];
+  for (const item of data ?? []) {
+    const caminho = `${prefixo}/${item.name}`;
+    if (item.id === null) {
+      total += await removerRecursivo(caminho);
+    } else {
+      arquivos.push(caminho);
+    }
+  }
+  if (arquivos.length) {
+    const { error: err } = await supabaseAdmin.storage.from(BUCKET).remove(arquivos);
+    if (err) throw err;
+    total += arquivos.length;
+  }
+  return total;
 }
 
 /** Remove as fotos de demonstração do Storage (usado por `npm run seed -- --limpar`). */
 export async function removerFotosDemo() {
   const { data: buckets } = await supabaseAdmin.storage.listBuckets();
   if (!buckets?.some((b) => b.id === BUCKET)) return 0;
-  let total = 0;
-  const { data: pastas } = await supabaseAdmin.storage.from(BUCKET).list(PREFIXO_STORAGE);
-  for (const pasta of pastas ?? []) {
-    const { data: arquivos } = await supabaseAdmin.storage.from(BUCKET).list(`${PREFIXO_STORAGE}/${pasta.name}`);
-    const caminhos = (arquivos ?? []).map((a) => `${PREFIXO_STORAGE}/${pasta.name}/${a.name}`);
-    if (caminhos.length) {
-      const { error } = await supabaseAdmin.storage.from(BUCKET).remove(caminhos);
-      if (error) throw error;
-      total += caminhos.length;
-    }
-  }
-  return total;
+  return removerRecursivo(PREFIXO_STORAGE);
 }
 
 // Execução direta: npm run seed:fotos

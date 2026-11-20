@@ -16,13 +16,12 @@ export function daysFromNow(days: number, hour = 12, minute = 0): string {
 const BASE = import.meta.env?.BASE_URL ?? '/';
 
 export type Comodo = 'bedroom' | 'livingroom' | 'kitchen' | 'bathroom';
-const TOTAL_PALETAS = 6;
 
 /**
- * Foto ilustrativa local (public/imoveis) — funciona offline durante a apresentação.
- * No sistema real, as fotos virão do Supabase Storage (bucket "anuncios").
+ * Foto real do pool local (public/imoveis/fotos) — funciona offline durante a apresentação.
+ * No modo API, o seed substitui estas URLs pelas fotos enviadas ao Supabase Storage.
  */
-export const fotoMock = (comodo: Comodo, variacao: number) =>
-  `${BASE}imoveis/${comodo}-${(Math.abs(variacao) % TOTAL_PALETAS) + 1}.svg`;
+export const fotoMock = (conjunto: string, ordem: number) =>
+  `${BASE}imoveis/fotos/${conjunto}/${String(ordem).padStart(2, '0')}.webp`;
 
 export const FOTO_FALLBACK = `${BASE}imovel-placeholder.svg`;

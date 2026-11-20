@@ -28,7 +28,7 @@ npm run dev               # http://localhost:3333/api
 | `npm run dev` | Servidor com *reload* (tsx watch) |
 | `npm run build` / `npm start` | Compila para `dist/` e executa |
 | `npm run typecheck` | Checagem de tipos |
-| `npm run seed` | Povoa com os mocks do front (`src/mocks`). Idempotente |
+| `npm run seed` | Povoa com os mocks do front (`src/mocks`): 60 anúncios e 20 conjuntos de fotos no Storage. Idempotente |
 | `npm run seed -- --limpar` | Remove os dados de demonstração e o que os usuários de demo criaram |
 | `npm run setup:storage` | Cria os buckets do Storage (idempotente) |
 

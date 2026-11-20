@@ -185,7 +185,7 @@ async function povoar() {
     })),
   );
 
-  // Fotos reais (Storage) para os anúncios que têm pasta em scripts/fotos-demo.
+  // Fotos reais (Storage) para todos os anúncios de demonstração, a partir do pool local.
   await aplicarFotosDemo();
 
   console.log(`\nPronto! Logins de demonstração (senha ${DEMO_SENHA}):`);
@@ -195,7 +195,11 @@ async function povoar() {
   }
 }
 
-/** Remove os dados de demonstração e tudo o que os usuários de demo criaram (ordem inversa das FKs). */
+/**
+ * Remove os dados de demonstração e tudo o que os usuários de demo criaram (ordem inversa das FKs).
+ * O catálogo compartilhado (instituições, campi e comodidades) é mantido: pode estar em uso por
+ * usuários/anúncios reais e o seed seguinte apenas atualiza os registros.
+ */
 async function limpar() {
   console.log('Removendo os dados de demonstração…');
   const usuarios = ids(db.usuarios).join(',');
@@ -226,9 +230,6 @@ async function limpar() {
     [T.estudante, `usuario_id.in.(${usuarios})`],
     [T.proprietario, `usuario_id.in.(${usuarios})`],
     [T.usuario, `id.in.(${usuarios})`],
-    [T.comodidade, `id.in.(${ids(db.comodidades).join(',')})`],
-    [T.campus, `id.in.(${ids(db.campi).join(',')})`],
-    [T.instituicao, `id.in.(${ids(db.instituicoes).join(',')})`],
   ];
 
   for (const [tabela, filtro] of etapas) {

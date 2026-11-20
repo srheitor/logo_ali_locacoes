@@ -67,6 +67,8 @@ Depois rode o workflow de novo (**Actions → Deploy GitHub Pages → Run workfl
 
 Na tela de login há botões de **acesso rápido** para os três perfis. No menu lateral, **“Restaurar dados da demo”** volta tudo ao estado inicial.
 
+O seed também cria **60 imóveis** (54 publicados na busca), 10 proprietários e 12 estudantes, com favoritos, visitas, conversas, avaliações, verificações e moderação. Todos os usuários de demonstração usam a senha `123456`; os demais perfis podem ser vistos no painel do administrador. As fotos dos imóveis ficam em `public/imoveis/fotos` (20 conjuntos CC0/domínio público — créditos em [`CREDITOS.md`](public/imoveis/fotos/CREDITOS.md)).
+
 ## Stack
 
 React 18 + TypeScript + Vite · Tailwind CSS · React Router · Leaflet/OpenStreetMap (mapa) · lucide-react (ícones) · ViaCEP (busca de endereço pelo CEP).

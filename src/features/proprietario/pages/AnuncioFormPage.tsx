@@ -5,6 +5,7 @@ import { useData } from '@/app/providers/DataProvider';
 import { useCurrentUser } from '@/features/auth/AuthProvider';
 import { LocationPicker } from '@/features/anuncios/components/LocationPicker';
 import { fotoMock } from '@/mocks/helpers';
+import { TODOS_OS_CONJUNTOS } from '@/mocks/fotos';
 import { fotosDoAnuncio, getAnuncio, regrasDoAnuncio } from '@/services/queries';
 import {
   CepInput,
@@ -101,8 +102,8 @@ export function AnuncioFormPage() {
   };
 
   const usarFotosExemplo = () => {
-    const seed = Math.floor(Math.random() * 1000);
-    setFotos((f) => [...f, ...(['bedroom', 'livingroom', 'kitchen'] as const).map((c) => fotoMock(c, seed))]);
+    const conjunto = TODOS_OS_CONJUNTOS[Math.floor(Math.random() * TODOS_OS_CONJUNTOS.length)]!;
+    setFotos((f) => [...f, ...[1, 2, 3].map((ordem) => fotoMock(conjunto, ordem))]);
     setFotosError(undefined);
   };
 

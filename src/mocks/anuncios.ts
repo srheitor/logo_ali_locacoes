@@ -4,10 +4,10 @@ import type {
   Comodidade,
   FotoAnuncio,
   RegraAnuncio,
-  StatusAnuncio,
-  TipoImovel,
 } from '@/shared/types/domain';
-import { daysFromNow, fotoMock, type Comodo } from './helpers';
+import { anunciosExtras, type AnuncioSeed } from './anuncios-extras';
+import { conjuntoDoAnuncio, FOTOS_POR_CONJUNTO } from './fotos';
+import { daysFromNow, fotoMock } from './helpers';
 
 export const comodidades: Comodidade[] = [
   { id: 'com-wifi', nome: 'Wi-Fi' },
@@ -19,32 +19,24 @@ export const comodidades: Comodidade[] = [
   { id: 'com-portaria', nome: 'Portaria 24h' },
   { id: 'com-pet', nome: 'Aceita pets' },
   { id: 'com-contas', nome: 'Água e luz inclusas' },
+  { id: 'com-fibra', nome: 'Internet fibra' },
+  { id: 'com-maquina', nome: 'Máquina de lavar' },
+  { id: 'com-gas', nome: 'Gás incluso' },
+  { id: 'com-ventilador', nome: 'Ventilador de teto' },
+  { id: 'com-banheiro-privativo', nome: 'Banheiro privativo' },
+  { id: 'com-elevador', nome: 'Elevador' },
+  { id: 'com-varanda', nome: 'Varanda' },
+  { id: 'com-quintal', nome: 'Quintal' },
+  { id: 'com-churrasqueira', nome: 'Churrasqueira' },
+  { id: 'com-piscina', nome: 'Piscina' },
+  { id: 'com-academia', nome: 'Academia' },
+  { id: 'com-cameras', nome: 'Câmeras de segurança' },
+  { id: 'com-interfone', nome: 'Interfone' },
+  { id: 'com-portao', nome: 'Portão eletrônico' },
+  { id: 'com-onibus', nome: 'Ponto de ônibus próximo' },
 ];
 
-interface AnuncioSeed {
-  id: string;
-  proprietario_id: string;
-  titulo: string;
-  descricao: string;
-  valor_aluguel: number;
-  tipo_imovel: TipoImovel;
-  quantidade_quartos: number;
-  mobiliado: boolean;
-  cep: string;
-  endereco: string;
-  bairro: string;
-  latitude: number;
-  longitude: number;
-  status?: StatusAnuncio;
-  disponibilidade_imediata?: boolean;
-  publicadoHaDias?: number;
-  total_visualizacoes: number;
-  aprovado_moderacao?: boolean;
-  comodidades: string[];
-  regras: string[];
-}
-
-const seeds: AnuncioSeed[] = [
+const seedsBase: AnuncioSeed[] = [
   {
     id: 'an-01',
     proprietario_id: 'usr-prop',
@@ -221,7 +213,7 @@ const seeds: AnuncioSeed[] = [
   },
 ];
 
-const comodos: Comodo[] = ['bedroom', 'livingroom', 'kitchen', 'bathroom'];
+const seeds: AnuncioSeed[] = [...seedsBase, ...anunciosExtras];
 
 export const anuncios: Anuncio[] = seeds.map((s) => {
   const publicadoHa = s.publicadoHaDias ?? 10;
@@ -252,14 +244,15 @@ export const anuncios: Anuncio[] = seeds.map((s) => {
   };
 });
 
-export const fotos: FotoAnuncio[] = seeds.flatMap((s, idx) =>
-  comodos.map((comodo, i) => ({
+export const fotos: FotoAnuncio[] = seeds.flatMap((s) => {
+  const conjunto = conjuntoDoAnuncio(s.id, s.tipo_imovel);
+  return Array.from({ length: FOTOS_POR_CONJUNTO }, (_, i) => ({
     id: `foto-${s.id}-${i + 1}`,
     anuncio_id: s.id,
-    url: fotoMock(comodo, idx),
+    url: fotoMock(conjunto, i + 1),
     ordem: i + 1,
-  })),
-);
+  }));
+});
 
 export const regras: RegraAnuncio[] = seeds.flatMap((s) =>
   s.regras.map((descricao, i) => ({ id: `regra-${s.id}-${i + 1}`, anuncio_id: s.id, descricao })),
