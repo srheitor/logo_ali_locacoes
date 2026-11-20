@@ -15,19 +15,21 @@ export function PresentationPage() {
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_10%,rgba(45,212,191,0.2),transparent_30%),linear-gradient(135deg,#020617_0%,#073b3a_55%,#0f766e_100%)]" />
         <div className="absolute -bottom-48 -left-24 -z-10 h-[30rem] w-[30rem] rounded-full bg-teal-400/10 blur-3xl" />
 
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
-          <Logo light />
-          <div className="flex items-center gap-3">
-            <Link to="/login" className="rounded-full px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10 hover:text-white">
-              Entrar
-            </Link>
-            <Link to="/cadastro" className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-teal-800 shadow-lg shadow-slate-950/10 transition hover:bg-teal-50">
-              Criar conta
-            </Link>
+        <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-slate-950/75 backdrop-blur-xl">
+          <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
+            <Logo light />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link to="/login" className="rounded-full px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4">
+                Entrar
+              </Link>
+              <Link to="/cadastro" className="rounded-full bg-white px-3 py-2 text-sm font-semibold text-teal-800 shadow-lg shadow-slate-950/10 transition hover:bg-teal-50 sm:px-4">
+                Criar conta
+              </Link>
+            </div>
           </div>
         </nav>
 
-        <div className="mx-auto grid max-w-7xl items-center gap-16 px-6 pb-20 pt-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:pb-28 lg:pt-20">
+        <div className="mx-auto grid max-w-7xl items-center gap-16 px-6 pb-20 pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:pb-28 lg:pt-32">
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-teal-200/20 bg-teal-200/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-teal-100">
               <Sparkles size={14} /> Morar bem começa aqui
